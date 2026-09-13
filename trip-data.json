@@ -1,0 +1,1523 @@
+{
+  "$schema": "./schemas/trip-data.schema.json",
+  "schemaVersion": "2.0-lite",
+  "config": {
+    "schemaVersion": "1.0.0",
+    "language": "zh-CN",
+    "modules": {
+      "flights": true,
+      "overview": true,
+      "itinerary": true,
+      "todo": true,
+      "driving": false,
+      "ledger": true
+    },
+    "persistence": {
+      "mode": "local"
+    }
+  },
+  "metadata": {
+    "tripId": "vn-phuquoc-hcmc-2026-10",
+    "title": "越南富国岛 + 胡志明 6天",
+    "language": "zh-CN",
+    "assets": {
+      "routeMaps": [
+        "assets/maps/templates/template-07-compact-basin.webp"
+      ]
+    }
+  },
+  "trip": {
+    "status": "draft",
+    "startDate": "2026-10-02",
+    "endDate": "2026-10-07",
+    "dayCount": 6,
+    "countries": [
+      {
+        "code": "VN",
+        "name": "Vietnam",
+        "nameZh": "越南"
+      }
+    ],
+    "primaryDestinationCountries": [
+      "VN"
+    ],
+    "primaryDestinationName": "越南",
+    "citiesAndAreas": [
+      "胡志明市",
+      "富国岛"
+    ],
+    "routeSummary": "广州 → 胡志明市 → 富国岛 → 广州",
+    "groupSize": 4
+  },
+  "flightJourneys": [
+    {
+      "id": "j1",
+      "label": "广州 → 胡志明市",
+      "status": "confirmed"
+    },
+    {
+      "id": "j2",
+      "label": "胡志明市 → 富国岛",
+      "status": "confirmed"
+    },
+    {
+      "id": "j3",
+      "label": "富国岛 → 胡志明市 → 广州",
+      "status": "confirmed"
+    }
+  ],
+  "flights": [
+    {
+      "id": "f1",
+      "journeyId": "j1",
+      "sequence": 1,
+      "airline": {
+        "nameZh": "待确认航司"
+      },
+      "flightNumber": "待确认",
+      "departure": {
+        "airportCode": "CAN",
+        "city": "广州",
+        "date": "2026-10-02",
+        "time": "02:30",
+        "utcOffset": "+08:00"
+      },
+      "arrival": {
+        "airportCode": "SGN",
+        "city": "胡志明市",
+        "date": "2026-10-02",
+        "time": "04:10",
+        "utcOffset": "+07:00"
+      }
+    },
+    {
+      "id": "f2",
+      "journeyId": "j2",
+      "sequence": 1,
+      "airline": {
+        "nameZh": "待确认航司"
+      },
+      "flightNumber": "待确认",
+      "departure": {
+        "airportCode": "SGN",
+        "city": "胡志明市",
+        "date": "2026-10-04",
+        "time": "15:00",
+        "utcOffset": "+07:00"
+      },
+      "arrival": {
+        "airportCode": "PQC",
+        "city": "富国岛",
+        "date": "2026-10-04",
+        "time": "16:00",
+        "utcOffset": "+07:00"
+      }
+    },
+    {
+      "id": "f3",
+      "journeyId": "j3",
+      "sequence": 1,
+      "airline": {
+        "nameZh": "待确认航司"
+      },
+      "flightNumber": "待确认",
+      "departure": {
+        "airportCode": "PQC",
+        "city": "富国岛",
+        "date": "2026-10-07",
+        "time": "16:00",
+        "utcOffset": "+07:00"
+      },
+      "arrival": {
+        "airportCode": "SGN",
+        "city": "胡志明市",
+        "date": "2026-10-07",
+        "time": "17:00",
+        "utcOffset": "+07:00"
+      }
+    },
+    {
+      "id": "f4",
+      "journeyId": "j3",
+      "sequence": 2,
+      "airline": {
+        "nameZh": "待确认航司"
+      },
+      "flightNumber": "待确认",
+      "departure": {
+        "airportCode": "SGN",
+        "city": "胡志明市",
+        "date": "2026-10-07",
+        "time": "18:55",
+        "utcOffset": "+07:00"
+      },
+      "arrival": {
+        "airportCode": "CAN",
+        "city": "广州",
+        "date": "2026-10-07",
+        "time": "23:15",
+        "utcOffset": "+08:00"
+      }
+    }
+  ],
+  "accommodations": [
+    {
+      "id": "stay1",
+      "name": "AMAROU酒店",
+      "city": "胡志明市",
+      "checkIn": "2026-10-02",
+      "checkOut": "2026-10-04",
+      "note": "去哪儿预订"
+    },
+    {
+      "id": "stay2",
+      "name": "ZAO HOTEL FIREWORK & Sea View",
+      "city": "富国岛日落小镇",
+      "checkIn": "2026-10-04",
+      "checkOut": "2026-10-06",
+      "note": "agoda预订"
+    },
+    {
+      "id": "stay3",
+      "name": "法米亚纳度假村 Famiana Resort",
+      "city": "富国岛中部",
+      "checkIn": "2026-10-06",
+      "checkOut": "2026-10-07",
+      "note": "躺平+SPA"
+    }
+  ],
+  "groundTransport": {
+    "rentalCar": null,
+    "rentalChecklist": [],
+    "drivingNotes": [],
+    "drivingReferenceLinks": [],
+    "plannedRoadLegs": [],
+    "publicTransitAndRail": []
+  },
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-10-02",
+      "title": "抵达胡志明 · 统一宫+战争博物馆",
+      "locations": [
+        "胡志明市"
+      ],
+      "schedule": [
+        {
+          "id": "d1-s1",
+          "time": "02:30",
+          "type": "flight",
+          "text": "广州白云(CAN) → 胡志明市(SGN)",
+          "placeId": "sgn-airport"
+        },
+        {
+          "id": "d1-s2",
+          "time": "04:10",
+          "type": "flight",
+          "text": "抵达胡志明市新山一机场",
+          "placeId": "sgn-airport"
+        },
+        {
+          "id": "d1-s3",
+          "time": "05:00",
+          "type": "transfer",
+          "text": "机场 → AMAROU酒店（Grab约30分钟，约¥30）",
+          "placeId": "hcmc-amarou"
+        },
+        {
+          "id": "d1-s4",
+          "time": "06:00",
+          "type": "check-in",
+          "text": "AMAROU酒店 入住/寄存行李",
+          "placeId": "hcmc-amarou"
+        },
+        {
+          "id": "d1-s5",
+          "time": "09:00",
+          "type": "rest",
+          "text": "酒店补觉休息"
+        },
+        {
+          "id": "d1-s6",
+          "time": "12:00",
+          "type": "restaurant",
+          "text": "午餐：🍜 待补充餐厅（见待办-找餐厅）",
+          "placeId": "hcmc-amarou"
+        },
+        {
+          "id": "d1-s7",
+          "time": "14:00",
+          "type": "attraction",
+          "text": "统一宫：看越战总统府+1975坦克冲入的末日作战室地下室（约¥17）",
+          "placeId": "hcmc-reunify"
+        },
+        {
+          "id": "d1-s7.5",
+          "time": "15:30",
+          "type": "walk",
+          "text": "统一宫 → 战争遗迹博物馆（步行约10分钟，免费）",
+          "placeId": "hcmc-war"
+        },
+        {
+          "id": "d1-s8",
+          "time": "16:00",
+          "type": "attraction",
+          "text": "战争遗迹博物馆：越战照片/武器/橙剂展，内容沉重留2h（约¥10）",
+          "placeId": "hcmc-war"
+        },
+        {
+          "id": "d1-s8.5",
+          "time": "18:00",
+          "type": "transfer",
+          "text": "战争遗迹博物馆 → 范五老街（Grab约15分钟，约¥15）",
+          "placeId": "hcmc-buivien"
+        },
+        {
+          "id": "d1-s9",
+          "time": "18:30",
+          "type": "restaurant",
+          "text": "晚餐：🍜 待补充餐厅",
+          "placeId": "hcmc-buivien"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2026-10-03",
+      "title": "胡志明文化日 · 法殖建筑群",
+      "locations": [
+        "胡志明市"
+      ],
+      "schedule": [
+        {
+          "id": "d2-s1",
+          "time": "09:00",
+          "type": "attraction",
+          "text": "中央邮局：寄明信片(¥3-8)+看拱顶彩绘，免费",
+          "placeId": "hcmc-post"
+        },
+        {
+          "id": "d2-s2",
+          "time": "10:00",
+          "type": "attraction",
+          "text": "红教堂：红砖双塔外景拍照（可能脚手架），免费",
+          "placeId": "hcmc-cathedral"
+        },
+        {
+          "id": "d2-s3",
+          "time": "10:30",
+          "type": "walk",
+          "text": "书街（步行5分钟，免费）",
+          "placeId": "hcmc-bookstreet"
+        },
+        {
+          "id": "d2-s4",
+          "time": "12:00",
+          "type": "restaurant",
+          "text": "午餐：🍜 待补充餐厅"
+        },
+        {
+          "id": "d2-s5",
+          "time": "14:00",
+          "type": "attraction",
+          "text": "咖啡公寓：旧公寓咖啡馆集合，电梯¥1+滴漏咖啡¥10-20",
+          "placeId": "hcmc-coffee"
+        },
+        {
+          "id": "d2-s5.5",
+          "time": "15:15",
+          "type": "walk",
+          "text": "咖啡公寓 → 滨城市场（步行约12分钟，免费）",
+          "placeId": "hcmc-benthanh"
+        },
+        {
+          "id": "d2-s6",
+          "time": "15:30",
+          "type": "attraction",
+          "text": "滨城市场：买伴手礼砍价1/3起，免费",
+          "placeId": "hcmc-benthanh"
+        },
+        {
+          "id": "d2-s7",
+          "time": "18:30",
+          "type": "restaurant",
+          "text": "晚餐：🍜 待补充餐厅"
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-10-04",
+      "title": "转场富国岛 · 日落小镇看烟花",
+      "locations": [
+        "胡志明市",
+        "富国岛"
+      ],
+      "schedule": [
+        {
+          "id": "d3-s1",
+          "time": "09:00",
+          "type": "note",
+          "text": "上午自由活动/购物"
+        },
+        {
+          "id": "d3-s2",
+          "time": "12:00",
+          "type": "check-out",
+          "text": "AMAROU酒店 退房"
+        },
+        {
+          "id": "d3-s3",
+          "time": "13:00",
+          "type": "transfer",
+          "text": "酒店 → 新山一机场（Grab约30分钟，约¥30）",
+          "placeId": "sgn-airport"
+        },
+        {
+          "id": "d3-s4",
+          "time": "15:00",
+          "type": "flight",
+          "text": "胡志明市(SGN) → 富国岛(PQC)（约¥133-150，时刻待确认）",
+          "placeId": "pqc-airport"
+        },
+        {
+          "id": "d3-s5",
+          "time": "17:00",
+          "type": "check-in",
+          "text": "ZAO HOTEL FIREWORK & Sea View 入住",
+          "placeId": "pqc-sunset"
+        },
+        {
+          "id": "d3-s6",
+          "time": "19:00",
+          "type": "attraction",
+          "text": "日落小镇：看Kiss Bridge+晚间烟花秀，免费",
+          "placeId": "pqc-sunset"
+        }
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2026-10-05",
+      "title": "富国岛南 · 缆车+乐园+跳岛",
+      "locations": [
+        "富国岛"
+      ],
+      "schedule": [
+        {
+          "id": "d4-s1",
+          "time": "08:30",
+          "type": "attraction",
+          "text": "跨海缆车：世界最长7.9km，脚下海水渐变深蓝（约¥170-200含香岛）",
+          "placeId": "pqc-cable"
+        },
+        {
+          "id": "d4-s2",
+          "time": "10:00",
+          "type": "attraction",
+          "text": "香岛乐园：水上乐园+沙滩玩大半天（含缆车票）",
+          "placeId": "pqc-honthom"
+        },
+        {
+          "id": "d4-s3",
+          "time": "12:00",
+          "type": "restaurant",
+          "text": "午餐：🍜 待补充餐厅"
+        },
+        {
+          "id": "d4-s4",
+          "time": "14:00",
+          "type": "attraction",
+          "text": "出海跳岛：南岛快艇浮潜果冻海，浪>1.5m停航（约¥150-300）",
+          "placeId": "pqc-islands"
+        },
+        {
+          "id": "d4-s5",
+          "time": "19:00",
+          "type": "restaurant",
+          "text": "晚餐：🍜 待补充餐厅"
+        },
+        {
+          "id": "d4-s6",
+          "time": "20:00",
+          "type": "attraction",
+          "text": "日落小镇 看烟花",
+          "placeId": "pqc-sunset"
+        }
+      ]
+    },
+    {
+      "day": 5,
+      "date": "2026-10-06",
+      "title": "转中部 · 法米亚纳躺平SPA",
+      "locations": [
+        "富国岛"
+      ],
+      "schedule": [
+        {
+          "id": "d5-s1",
+          "time": "09:00",
+          "type": "note",
+          "text": "上午 缆车/乐园 或 沙滩收尾（自由）"
+        },
+        {
+          "id": "d5-s2",
+          "time": "12:00",
+          "type": "check-out",
+          "text": "ZAO HOTEL 退房"
+        },
+        {
+          "id": "d5-s3",
+          "time": "13:00",
+          "type": "transfer",
+          "text": "日落小镇 → 法米亚纳度假村（Grab约1h，约¥80）",
+          "placeId": "pqc-famiana"
+        },
+        {
+          "id": "d5-s4",
+          "time": "15:00",
+          "type": "check-in",
+          "text": "法米亚纳度假村 Famiana 入住",
+          "placeId": "pqc-famiana"
+        },
+        {
+          "id": "d5-s5",
+          "time": "16:00",
+          "type": "rest",
+          "text": "躺平（泳池/沙滩）"
+        },
+        {
+          "id": "d5-s6",
+          "time": "18:00",
+          "type": "restaurant",
+          "text": "晚餐：🍜 待补充餐厅"
+        },
+        {
+          "id": "d5-s7",
+          "time": "20:00",
+          "type": "rest",
+          "text": "SPA 按摩（约¥90-130）"
+        }
+      ]
+    },
+    {
+      "day": 6,
+      "date": "2026-10-07",
+      "title": "返程 · 富国岛→胡志明→广州",
+      "locations": [
+        "富国岛",
+        "胡志明市"
+      ],
+      "schedule": [
+        {
+          "id": "d6-s1",
+          "time": "09:00",
+          "type": "rest",
+          "text": "法米亚纳 躺平/海边"
+        },
+        {
+          "id": "d6-s2",
+          "time": "12:00",
+          "type": "check-out",
+          "text": "法米亚纳 退房"
+        },
+        {
+          "id": "d6-s3",
+          "time": "14:00",
+          "type": "transfer",
+          "text": "酒店 → 富国岛机场（Grab约40分钟，约¥60）",
+          "placeId": "pqc-airport"
+        },
+        {
+          "id": "d6-s4",
+          "time": "16:00",
+          "type": "flight",
+          "text": "富国岛(PQC) → 胡志明市(SGN)（约¥133-165）",
+          "placeId": "sgn-airport"
+        },
+        {
+          "id": "d6-s5",
+          "time": "18:00",
+          "type": "flight",
+          "text": "胡志明市(SGN) → 广州(CAN)（约¥1788）",
+          "placeId": "sgn-airport"
+        },
+        {
+          "id": "d6-s6",
+          "time": "23:00",
+          "type": "note",
+          "text": "抵达广州"
+        }
+      ]
+    }
+  ],
+  "places": [
+    {
+      "id": "sgn-airport",
+      "name": "新山一机场",
+      "nameZh": "新山一机场(SGN)",
+      "cityOrArea": "胡志明市",
+      "geo": {
+        "lat": 10.8188,
+        "lng": 106.652
+      }
+    },
+    {
+      "id": "hcmc-amarou",
+      "name": "AMAROU酒店",
+      "nameZh": "AMAROU酒店",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7799,
+        "lng": 106.6998
+      }
+    },
+    {
+      "id": "hcmc-reunify",
+      "name": "统一宫",
+      "nameZh": "统一宫",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7771,
+        "lng": 106.6955
+      }
+    },
+    {
+      "id": "hcmc-war",
+      "name": "战争遗迹博物馆",
+      "nameZh": "战争遗迹博物馆",
+      "cityOrArea": "胡志明市",
+      "geo": {
+        "lat": 10.7794,
+        "lng": 106.692
+      }
+    },
+    {
+      "id": "hcmc-post",
+      "name": "中央邮局",
+      "nameZh": "中央邮局",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7799,
+        "lng": 106.6998
+      }
+    },
+    {
+      "id": "hcmc-cathedral",
+      "name": "圣母大教堂(红教堂)",
+      "nameZh": "红教堂",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7797,
+        "lng": 106.699
+      }
+    },
+    {
+      "id": "hcmc-bookstreet",
+      "name": "书街",
+      "nameZh": "书街",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7805,
+        "lng": 106.7005
+      }
+    },
+    {
+      "id": "hcmc-coffee",
+      "name": "咖啡公寓",
+      "nameZh": "咖啡公寓",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.774,
+        "lng": 106.704
+      }
+    },
+    {
+      "id": "hcmc-benthanh",
+      "name": "滨城市场",
+      "nameZh": "滨城市场",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7725,
+        "lng": 106.698
+      }
+    },
+    {
+      "id": "hcmc-buivien",
+      "name": "范五老街",
+      "nameZh": "范五老街",
+      "cityOrArea": "胡志明市第一郡",
+      "geo": {
+        "lat": 10.7683,
+        "lng": 106.693
+      }
+    },
+    {
+      "id": "pqc-airport",
+      "name": "富国岛机场",
+      "nameZh": "富国岛机场(PQC)",
+      "cityOrArea": "富国岛",
+      "geo": {
+        "lat": 10.1698,
+        "lng": 103.9931
+      }
+    },
+    {
+      "id": "pqc-sunset",
+      "name": "日落小镇",
+      "nameZh": "日落小镇(ZÃO酒店)",
+      "cityOrArea": "富国岛",
+      "geo": {
+        "lat": 10.0272,
+        "lng": 104.0233
+      }
+    },
+    {
+      "id": "pqc-cable",
+      "name": "跨海缆车",
+      "nameZh": "跨海缆车(世界最长)",
+      "cityOrArea": "富国岛",
+      "geo": {
+        "lat": 10.029,
+        "lng": 104.02
+      }
+    },
+    {
+      "id": "pqc-honthom",
+      "name": "香岛乐园",
+      "nameZh": "香岛乐园(Sun World)",
+      "cityOrArea": "富国岛",
+      "geo": {
+        "lat": 9.985,
+        "lng": 104.01
+      }
+    },
+    {
+      "id": "pqc-islands",
+      "name": "出海跳岛",
+      "nameZh": "出海跳岛(An Thoi群岛)",
+      "cityOrArea": "富国岛",
+      "geo": {
+        "lat": 10.01,
+        "lng": 104.05
+      }
+    },
+    {
+      "id": "pqc-famiana",
+      "name": "法米亚纳度假村",
+      "nameZh": "法米亚纳度假村(Famiana)",
+      "cityOrArea": "富国岛",
+      "geo": {
+        "lat": 10.2288,
+        "lng": 103.963
+      }
+    }
+  ],
+  "restaurants": [],
+  "bookingsAndTickets": [],
+  "ticketPlanning": {
+    "statusStorage": "local",
+    "statusStorageNote": "门票状态默认只保存在当前浏览器。",
+    "items": []
+  },
+  "preTrip": {
+    "packingItems": [
+      {
+        "id": "todo1",
+        "text": "办越南电子签 e-Visa（4人，90天多次，约$25/人）",
+        "completed": false
+      },
+      {
+        "id": "todo2",
+        "text": "核查4人护照有效期（≥6个月）",
+        "completed": false
+      },
+      {
+        "id": "todo3",
+        "text": "确认 胡志明↔富国岛、富国岛→胡志明→广州 具体航班时刻与航司",
+        "completed": false
+      },
+      {
+        "id": "todo4",
+        "text": "订 跨海缆车+香岛乐园 门票（可退改，雷暴会停运）",
+        "completed": false
+      },
+      {
+        "id": "todo5",
+        "text": "订 出海跳岛（可选，看海况，前一晚确认船班）",
+        "completed": false
+      },
+      {
+        "id": "todo6",
+        "text": "买旅行保险（含医疗+航班延误）",
+        "completed": false
+      },
+      {
+        "id": "todo7",
+        "text": "买越南 eSIM/电话卡（Viettel 信号最好）",
+        "completed": false
+      },
+      {
+        "id": "todo8",
+        "text": "换越南盾现金（1万越南盾≈¥2.6）",
+        "completed": false
+      },
+      {
+        "id": "todo9",
+        "text": "查10月富国岛天气/海况（Windy App）",
+        "completed": false
+      },
+      {
+        "id": "todo10",
+        "text": "找餐厅：胡志明+富国岛好吃的餐厅、有意思的店（到每日行程里补充）",
+        "completed": false
+      }
+    ],
+    "preparationsExplicitlyMentioned": [
+      "越南电子签",
+      "找餐厅"
+    ],
+    "missingNote": ""
+  },
+  "mapLinks": {
+    "providedGoogleMapsLinks": [],
+    "note": "",
+    "cityLevelNavigationDisabled": false,
+    "navigationPolicy": {
+      "noNavigationTypes": [
+        "flight",
+        "note",
+        "rest"
+      ],
+      "selfNavigationTypes": [
+        "drive",
+        "return",
+        "transfer",
+        "check-in",
+        "check-out",
+        "restaurant",
+        "attraction",
+        "walk",
+        "hike"
+      ]
+    },
+    "navigationPlaces": []
+  },
+  "issuesAndUncertainties": [],
+  "map": {
+    "schemaVersion": "1.0-lite",
+    "mapMode": "template-auto",
+    "templateId": "auto",
+    "region": {
+      "id": "vietnam",
+      "label": "越南",
+      "countryCode": "VN"
+    },
+    "places": [
+      {
+        "id": "sgn-airport",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.8188,
+          "lng": 106.652
+        }
+      },
+      {
+        "id": "hcmc-amarou",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7799,
+          "lng": 106.6998
+        }
+      },
+      {
+        "id": "hcmc-reunify",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7771,
+          "lng": 106.6955
+        }
+      },
+      {
+        "id": "hcmc-war",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7794,
+          "lng": 106.692
+        }
+      },
+      {
+        "id": "hcmc-post",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7799,
+          "lng": 106.6998
+        }
+      },
+      {
+        "id": "hcmc-cathedral",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7797,
+          "lng": 106.699
+        }
+      },
+      {
+        "id": "hcmc-bookstreet",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7805,
+          "lng": 106.7005
+        }
+      },
+      {
+        "id": "hcmc-coffee",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.774,
+          "lng": 106.704
+        }
+      },
+      {
+        "id": "hcmc-benthanh",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7725,
+          "lng": 106.698
+        }
+      },
+      {
+        "id": "hcmc-buivien",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.7683,
+          "lng": 106.693
+        }
+      },
+      {
+        "id": "pqc-airport",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.1698,
+          "lng": 103.9931
+        }
+      },
+      {
+        "id": "pqc-sunset",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.0272,
+          "lng": 104.0233
+        }
+      },
+      {
+        "id": "pqc-cable",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.029,
+          "lng": 104.02
+        }
+      },
+      {
+        "id": "pqc-honthom",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 9.985,
+          "lng": 104.01
+        }
+      },
+      {
+        "id": "pqc-islands",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.01,
+          "lng": 104.05
+        }
+      },
+      {
+        "id": "pqc-famiana",
+        "countryCode": "VN",
+        "geo": {
+          "lat": 10.2288,
+          "lng": 103.963
+        }
+      }
+    ],
+    "routes": [
+      {
+        "day": 1,
+        "placeIds": [
+          "sgn-airport",
+          "hcmc-amarou"
+        ]
+      },
+      {
+        "day": 3,
+        "placeIds": [
+          "hcmc-amarou",
+          "pqc-sunset"
+        ]
+      },
+      {
+        "day": 5,
+        "placeIds": [
+          "pqc-sunset",
+          "pqc-famiana"
+        ]
+      },
+      {
+        "day": 6,
+        "placeIds": [
+          "pqc-famiana",
+          "sgn-airport"
+        ]
+      }
+    ],
+    "dailyRoutes": []
+  },
+  "routeMap": {
+    "defaultRegionId": "vietnam",
+    "regions": [
+      {
+        "id": "vietnam",
+        "label": "越南",
+        "countryCode": "VN",
+        "scope": "template-schematic",
+        "mapMode": "frozen-template",
+        "templateId": "compact-basin",
+        "mapModeReason": "dense-place-cluster",
+        "mapModeMetrics": {
+          "placeCount": 16,
+          "geoPlaceCount": 16,
+          "widthKm": 299.14,
+          "heightKm": 92.55,
+          "spanKm": 307.44,
+          "averageNearestKm": 2.07,
+          "components": 1,
+          "largestLegKm": 304.45,
+          "jumpRatio": 1.01
+        },
+        "days": [
+          1,
+          3,
+          5,
+          6
+        ],
+        "canvas": {
+          "width": 1448,
+          "height": 1086
+        },
+        "projection": {
+          "type": "relative-schematic",
+          "bounds": null
+        },
+        "baseImage": "assets/maps/templates/template-07-compact-basin.webp",
+        "title": "越南 · 旅行路线",
+        "ariaLabel": "越南模板化旅行路线示意图，共4天",
+        "disclaimer": "本图为模板化行程示意图，仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。如需使用真实国家或城市地图，可在生成后自行调整。",
+        "heading": {
+          "text": "越南",
+          "x": 33,
+          "y": 105,
+          "size": 40
+        },
+        "legend": {
+          "x": 35,
+          "y": 168,
+          "gap": 43
+        },
+        "annotations": [],
+        "routes": [
+          {
+            "day": 1,
+            "color": "#397dc1",
+            "placeIds": [
+              "sgn-airport",
+              "hcmc-amarou"
+            ],
+            "paths": [
+              "M1111.3 285.71 C1131.5 369.6 1127.3 452.2 1099.08 528.8"
+            ],
+            "overviewPaths": [
+              "M1111.3 285.71 C1131.5 369.6 1127.3 452.2 1099.08 528.8"
+            ]
+          },
+          {
+            "day": 3,
+            "color": "#618344",
+            "placeIds": [
+              "hcmc-amarou",
+              "pqc-sunset"
+            ],
+            "paths": [
+              "M1099.08 528.8 C848.4 621.4 590.6 684.8 340.79 715.39"
+            ],
+            "overviewPaths": [
+              "M1099.08 528.8 C848.4 621.4 590.6 684.8 340.79 715.39"
+            ]
+          },
+          {
+            "day": 5,
+            "color": "#8865a5",
+            "placeIds": [
+              "pqc-sunset",
+              "pqc-famiana"
+            ],
+            "paths": [
+              "M340.79 715.39 C294.6 679.9 261.7 634.8 244 582.62"
+            ],
+            "overviewPaths": [
+              "M340.79 715.39 C294.6 679.9 261.7 634.8 244 582.62"
+            ]
+          },
+          {
+            "day": 6,
+            "color": "#df6185",
+            "placeIds": [
+              "pqc-famiana",
+              "sgn-airport"
+            ],
+            "paths": [
+              "M244 582.62 C548.6 510.1 843.5 409.1 1111.3 285.71"
+            ],
+            "overviewPaths": [
+              "M244 582.62 C548.6 510.1 843.5 409.1 1111.3 285.71"
+            ]
+          }
+        ],
+        "places": [
+          {
+            "id": "sgn-airport",
+            "x": 1111.3,
+            "y": 285.71,
+            "color": "#397dc1",
+            "tx": 1143.3,
+            "ty": 253.71,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "sgn-airport"
+            ],
+            "query": "sgn-airport 越南",
+            "geo": {
+              "lat": 10.8188,
+              "lng": 106.652
+            },
+            "days": [
+              1,
+              6
+            ]
+          },
+          {
+            "id": "hcmc-amarou",
+            "x": 1099.08,
+            "y": 528.8,
+            "color": "#397dc1",
+            "tx": 1067.08,
+            "ty": 496.8,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "hcmc-amarou"
+            ],
+            "query": "hcmc-amarou 越南",
+            "geo": {
+              "lat": 10.7799,
+              "lng": 106.6998
+            },
+            "days": [
+              1,
+              3
+            ]
+          },
+          {
+            "id": "hcmc-reunify",
+            "x": 980.95,
+            "y": 407.3,
+            "color": "#397dc1",
+            "tx": 902.95,
+            "ty": 345.3,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "hcmc-reunify"
+            ],
+            "query": "hcmc-reunify 越南",
+            "geo": {
+              "lat": 10.7771,
+              "lng": 106.6955
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-war",
+            "x": 1191.15,
+            "y": 324.52,
+            "color": "#397dc1",
+            "tx": 1053.15,
+            "ty": 236.52,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "hcmc-war"
+            ],
+            "query": "hcmc-war 越南",
+            "geo": {
+              "lat": 10.7794,
+              "lng": 106.692
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-post",
+            "x": 1043.06,
+            "y": 344.13,
+            "color": "#397dc1",
+            "tx": 905.06,
+            "ty": 446.13,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "hcmc-post"
+            ],
+            "query": "hcmc-post 越南",
+            "geo": {
+              "lat": 10.7799,
+              "lng": 106.6998
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-cathedral",
+            "x": 1196,
+            "y": 503.55,
+            "color": "#397dc1",
+            "tx": 1058,
+            "ty": 605.55,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "hcmc-cathedral"
+            ],
+            "query": "hcmc-cathedral 越南",
+            "geo": {
+              "lat": 10.7797,
+              "lng": 106.699
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-bookstreet",
+            "x": 1052.62,
+            "y": 439.74,
+            "color": "#397dc1",
+            "tx": 1130.62,
+            "ty": 515.74,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "hcmc-bookstreet"
+            ],
+            "query": "hcmc-bookstreet 越南",
+            "geo": {
+              "lat": 10.7805,
+              "lng": 106.7005
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-coffee",
+            "x": 1196,
+            "y": 409.14,
+            "color": "#397dc1",
+            "tx": 1274,
+            "ty": 347.14,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "hcmc-coffee"
+            ],
+            "query": "hcmc-coffee 越南",
+            "geo": {
+              "lat": 10.774,
+              "lng": 106.704
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-benthanh",
+            "x": 1118.65,
+            "y": 368.82,
+            "color": "#397dc1",
+            "tx": 1086.65,
+            "ty": 336.82,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "hcmc-benthanh"
+            ],
+            "query": "hcmc-benthanh 越南",
+            "geo": {
+              "lat": 10.7725,
+              "lng": 106.698
+            },
+            "days": []
+          },
+          {
+            "id": "hcmc-buivien",
+            "x": 1131.4,
+            "y": 456.63,
+            "color": "#397dc1",
+            "tx": 1163.4,
+            "ty": 424.63,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "hcmc-buivien"
+            ],
+            "query": "hcmc-buivien 越南",
+            "geo": {
+              "lat": 10.7683,
+              "lng": 106.693
+            },
+            "days": []
+          },
+          {
+            "id": "pqc-airport",
+            "x": 310.38,
+            "y": 524.64,
+            "color": "#397dc1",
+            "tx": 448.38,
+            "ty": 436.64,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "pqc-airport"
+            ],
+            "query": "pqc-airport 越南",
+            "geo": {
+              "lat": 10.1698,
+              "lng": 103.9931
+            },
+            "days": []
+          },
+          {
+            "id": "pqc-sunset",
+            "x": 340.79,
+            "y": 715.39,
+            "color": "#618344",
+            "tx": 478.79,
+            "ty": 817.39,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "pqc-sunset"
+            ],
+            "query": "pqc-sunset 越南",
+            "geo": {
+              "lat": 10.0272,
+              "lng": 104.0233
+            },
+            "days": [
+              3,
+              5
+            ]
+          },
+          {
+            "id": "pqc-cable",
+            "x": 329.51,
+            "y": 611.97,
+            "color": "#397dc1",
+            "tx": 361.51,
+            "ty": 579.97,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "pqc-cable"
+            ],
+            "query": "pqc-cable 越南",
+            "geo": {
+              "lat": 10.029,
+              "lng": 104.02
+            },
+            "days": []
+          },
+          {
+            "id": "pqc-honthom",
+            "x": 264.23,
+            "y": 672.81,
+            "color": "#397dc1",
+            "tx": 232.23,
+            "ty": 640.81,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "pqc-honthom"
+            ],
+            "query": "pqc-honthom 越南",
+            "geo": {
+              "lat": 9.985,
+              "lng": 104.01
+            },
+            "days": []
+          },
+          {
+            "id": "pqc-islands",
+            "x": 406.02,
+            "y": 653.99,
+            "color": "#397dc1",
+            "tx": 484.02,
+            "ty": 729.99,
+            "size": 24,
+            "anchor": "start",
+            "lines": [
+              "pqc-islands"
+            ],
+            "query": "pqc-islands 越南",
+            "geo": {
+              "lat": 10.01,
+              "lng": 104.05
+            },
+            "days": []
+          },
+          {
+            "id": "pqc-famiana",
+            "x": 244,
+            "y": 582.62,
+            "color": "#8865a5",
+            "tx": 212,
+            "ty": 550.62,
+            "size": 24,
+            "anchor": "end",
+            "lines": [
+              "pqc-famiana"
+            ],
+            "query": "pqc-famiana 越南",
+            "geo": {
+              "lat": 10.2288,
+              "lng": 103.963
+            },
+            "days": [
+              5,
+              6
+            ]
+          }
+        ],
+        "overviewPlaceIds": [
+          "sgn-airport",
+          "hcmc-amarou",
+          "pqc-sunset",
+          "pqc-famiana",
+          "hcmc-post",
+          "hcmc-cathedral",
+          "hcmc-bookstreet",
+          "hcmc-coffee",
+          "hcmc-benthanh",
+          "hcmc-buivien"
+        ],
+        "dailyLayouts": {
+          "1": {
+            "places": [
+              "sgn-airport",
+              "hcmc-amarou"
+            ],
+            "labels": {
+              "sgn-airport": {
+                "x": 1143.3,
+                "y": 253.71,
+                "anchor": "start"
+              },
+              "hcmc-amarou": {
+                "x": 1067.08,
+                "y": 496.8,
+                "anchor": "end"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 1105.19,
+                "y": 407.25
+              }
+            ]
+          },
+          "3": {
+            "places": [
+              "hcmc-amarou",
+              "pqc-sunset"
+            ],
+            "labels": {
+              "hcmc-amarou": {
+                "x": 1067.08,
+                "y": 496.8,
+                "anchor": "end"
+              },
+              "pqc-sunset": {
+                "x": 478.79,
+                "y": 817.39,
+                "anchor": "start"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 719.93,
+                "y": 622.1
+              }
+            ]
+          },
+          "5": {
+            "places": [
+              "pqc-sunset",
+              "pqc-famiana"
+            ],
+            "labels": {
+              "pqc-sunset": {
+                "x": 478.79,
+                "y": 817.39,
+                "anchor": "start"
+              },
+              "pqc-famiana": {
+                "x": 212,
+                "y": 550.62,
+                "anchor": "end"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 292.39,
+                "y": 649
+              }
+            ]
+          },
+          "6": {
+            "places": [
+              "pqc-famiana",
+              "sgn-airport"
+            ],
+            "labels": {
+              "pqc-famiana": {
+                "x": 212,
+                "y": 550.62,
+                "anchor": "end"
+              },
+              "sgn-airport": {
+                "x": 1143.3,
+                "y": 253.71,
+                "anchor": "start"
+              }
+            },
+            "transport": [
+              {
+                "items": [],
+                "x": 677.65,
+                "y": 434.16
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
