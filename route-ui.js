@@ -96,6 +96,19 @@ function leafletPlaceName(placeId) {
   return place?.nameZh || place?.name || placeId;
 }
 
+function googleMapsRouteUrl(route) {
+  const mapPlaces = state.data?.map?.places || [];
+  if (route?.day) {
+    const day = state.data.days.find((d) => d.day === route.day);
+    const ids = []; const seen = new Set();
+    (day?.schedule || []).forEach((item) => { if (item.placeId && !seen.has(item.placeId)) { seen.add(item.placeId); ids.push(item.placeId); } });
+    const stops = ids.map((id) => { const p = mapPlaces.find((mp) => mp.id === id); return p?.geo && Number.isFinite(Number(p.geo.lat)) ? `${p.geo.lat},${p.geo.lng}` : encodeURIComponent(leafletPlaceName(id)); });
+    if (stops.length >= 2) return `https://www.google.com/maps/dir/${stops.join("/")}`;
+    if (stops.length === 1) return `https://www.google.com/maps/search/?api=1&query=${stops[0]}`;
+  }
+  return mapsSearch(state.data?.trip?.primaryDestinationName || "胡志明市 富国岛");
+}
+
 const stepTypeNames = {
   flight: "✈️ 飞机", transfer: "🚗 Grab/接驳", walk: "🚶 步行", drive: "🚗 自驾",
   train: "🚆 火车", rail: "🚆 火车", ferry: "⛴️ 渡轮", boat: "⛴️ 游船",
@@ -115,9 +128,10 @@ function renderRouteSteps(dayNumber) {
 }
 
 function travelMapMarkup(source, route) {
+  const gmapsUrl = googleMapsRouteUrl(route);
   return `<div class="travel-map-block ${route ? "is-daily" : "is-overview"}">
     <div class="leaflet-map-host" id="route-leaflet-map" data-leaflet-day="${route ? route.day : 0}" style="height:440px;border-radius:12px;overflow:hidden"></div>
-    <div class="map-utility"><span>${route ? "当天路线 · 点标记看地点" : "真实地图（高德地图）· 点标记看地点"}</span></div>
+    <div class="map-utility"><span>${route ? "当天路线 · 点标记看地点" : "真实地图 · 点标记看地点"}</span><a href="${gmapsUrl}" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#1a73e8;margin-left:10px">在 Google 地图中打开 ↗</a></div>
   </div>`;
 }
 
@@ -127,7 +141,7 @@ function renderLeafletMap(dayNumber) {
   const mapPlaces = state.data?.map?.places || [];
   const mapRoutes = state.data?.map?.routes || [];
   const map = L.map(host, { scrollWheelZoom: false });
-  L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}", { subdomains: ["1","2","3","4"], maxZoom: 18, attribution: "&copy; 高德地图" }).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "&copy; OpenStreetMap" }).addTo(map);
   const latlngs = [];
   if (dayNumber) {
     const day = state.data.days.find((d) => d.day === dayNumber);
