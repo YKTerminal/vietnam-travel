@@ -64,9 +64,7 @@
     {
       "id": "j2",
       "label": "胡志明市 → 富国岛",
-      "status": "pending",
-      "placeholder": true,
-      "note": "10.4 下午，具体航班待补"
+      "status": "confirmed"
     },
     {
       "id": "j3",
@@ -80,7 +78,7 @@
       "journeyId": "j1",
       "sequence": 1,
       "airline": {
-        "nameZh": "待确认航司"
+        "nameZh": "越旅行航空"
       },
       "flightNumber": "VU8601",
       "departure": {
@@ -100,6 +98,29 @@
     },
     {
       "id": "f2",
+      "journeyId": "j2",
+      "sequence": 1,
+      "airline": {
+        "nameZh": "越捷航空"
+      },
+      "flightNumber": "VJ331",
+      "departure": {
+        "airportCode": "SGN",
+        "city": "胡志明市",
+        "date": "2026-10-04",
+        "time": "17:20",
+        "utcOffset": "+07:00"
+      },
+      "arrival": {
+        "airportCode": "PQC",
+        "city": "富国岛",
+        "date": "2026-10-04",
+        "time": "18:20",
+        "utcOffset": "+07:00"
+      }
+    },
+    {
+      "id": "f3",
       "journeyId": "j3",
       "sequence": 1,
       "airline": {
@@ -328,38 +349,38 @@
         },
         {
           "id": "d3-s5",
-          "time": "14:00",
+          "time": "15:30",
           "type": "transfer",
           "text": "酒店 → 新山一机场（Grab约30分钟，约¥30）",
           "placeId": "sgn"
         },
         {
           "id": "d3-s6",
-          "time": "15:00",
+          "time": "17:20",
           "type": "flight",
-          "text": "胡志明(SGN) → 富国岛(PQC)（航班待补，约¥133-150）",
+          "text": "胡志明(SGN) → 富国岛(PQC) VJ331（越捷航空，约¥133-150）",
           "placeId": "pqc"
         },
         {
           "id": "d3-s7",
-          "time": "16:00",
-          "type": "check-in",
-          "text": "ZAO Hotel Firework & Sea View 入住（日落小镇）",
-          "placeId": "zao"
+          "time": "18:20",
+          "type": "flight",
+          "text": "抵达富国岛机场",
+          "placeId": "pqc"
         },
         {
           "id": "d3-s8",
-          "time": "18:00",
-          "type": "walk",
-          "text": "Sunset Town：日落、Kiss Bridge、海边夜景",
-          "placeId": "sunset"
+          "time": "19:00",
+          "type": "transfer",
+          "text": "机场 → ZAO Hotel（Grab约40分钟，约¥60）",
+          "placeId": "zao"
         },
         {
           "id": "d3-s9",
-          "time": "19:30",
-          "type": "attraction",
-          "text": "烟花/演出（以当天官方场次为准）",
-          "placeId": "kissbridge"
+          "time": "20:00",
+          "type": "check-in",
+          "text": "ZAO Hotel 入住 + Sunset Town 夜景（Kiss Bridge 灯光/烟花，以当天场次为准）",
+          "placeId": "sunset"
         }
       ]
     },
@@ -863,7 +884,7 @@
     "packingItems": [
       {
         "id": "todo1",
-        "text": "订 10/4 胡志明→富国岛机票（唯一待补项）",
+        "text": "订 10/4 胡志明→富国岛 VJ331 17:20 机票",
         "completed": false
       },
       {
@@ -920,10 +941,6 @@
     "navigationPlaces": []
   },
   "issuesAndUncertainties": [
-    {
-      "id": "flight-sgn-pqc",
-      "text": "10/4 胡志明 → 富国岛航班待补，建议下午出发。"
-    },
     {
       "id": "phu-quoc-sea",
       "text": "10/5 跳岛受海况影响，具体岛屿顺序以当天船公司安排为准。"
