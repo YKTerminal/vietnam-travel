@@ -352,7 +352,7 @@ function renderFlightMaps() {
     host.style.height = "150px";
     card.appendChild(host);
     const map = L.map(host, { scrollWheelZoom: false, dragging: false, touchZoom: false, doubleClickZoom: false, zoomControl: false, attributionControl: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+    L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}", { subdomains: ["1","2","3","4"], maxZoom: 18 }).addTo(map);
     L.circleMarker([dep.lat, dep.lng], { radius: 6, color: "#2563eb", fillColor: "#2563eb", fillOpacity: 0.9, weight: 2 }).addTo(map).bindPopup(`${dep.name} (起飞)`);
     L.circleMarker([arr.lat, arr.lng], { radius: 6, color: "#e11d48", fillColor: "#e11d48", fillOpacity: 0.9, weight: 2 }).addTo(map).bindPopup(`${arr.name} (降落)`);
     L.polyline([[dep.lat, dep.lng], [arr.lat, arr.lng]], { color: "#e11d48", weight: 2, dashArray: "5 4" }).addTo(map);

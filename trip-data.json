@@ -6,8 +6,8 @@
     "modules": {
       "flights": true,
       "overview": true,
-      "itinerary": true,
-      "todo": true,
+      "itinerary": false,
+      "todo": false,
       "driving": false,
       "ledger": true
     },

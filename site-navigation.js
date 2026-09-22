@@ -30,10 +30,10 @@
     activeView = nextView;
     const ledgerActive = nextView === "ledger";
 
-    travelView.hidden = ledgerActive;
-    ledgerView.hidden = !ledgerActive;
-    travelView.toggleAttribute("inert", ledgerActive);
-    ledgerView.toggleAttribute("inert", !ledgerActive);
+    travelView.hidden = false;
+    ledgerView.hidden = false;
+    travelView.removeAttribute("inert");
+    ledgerView.removeAttribute("inert");
     document.body.dataset.activeView = nextView;
     if (travelTrigger) {
       if (ledgerActive) travelTrigger.removeAttribute("aria-current");
@@ -104,7 +104,7 @@
       if (ledgerLink) {
         event.preventDefault();
         travelMenu?.removeAttribute("open");
-        navigate("#ledger");
+        document.getElementById("ledger-view")?.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
 
