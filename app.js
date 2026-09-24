@@ -245,6 +245,7 @@ function flightStopMarkup(stop, position, journeyStartDate) {
     <div class="flight-stop${position > 0 && position < stop.totalStops - 1 ? " is-transfer" : ""}">
       <span class="flight-stop__code">${escapeHtml(stop.airport.airportCode)}</span>
       <span class="flight-stop__city">${escapeHtml(airportCity(stop.airport))}</span>
+      ${stop.airport.terminal ? `<span class="flight-stop__term">${escapeHtml(stop.airport.terminal)}</span>` : ""}
       <span class="flight-stop__dot" aria-hidden="true"></span>
       <div class="flight-stop__timing">${timing}</div>
     </div>
@@ -295,6 +296,7 @@ function flightCard(journey, index) {
   }
   const first = flights[0];
   const last = flights[flights.length - 1];
+  const purchased = flights.some((flight) => flight.purchased);
   const status = journeyStatusAndTarget(flights);
   const countdown = status.complete ? "已完成" : preciseCountdownText(status.target, "即将出发");
   const stops = [
@@ -322,6 +324,7 @@ function flightCard(journey, index) {
     <article class="flight-card" data-journey="${escapeHtml(journey.id)}">
       <div class="flight-card__top">
         <span>FLIGHT ${String(index + 1).padStart(2, "0")} / ${String(state.data.flightJourneys.length).padStart(2, "0")}</span>
+        ${purchased ? `<span class="flight-card__badge">已购票 ✓</span>` : ""}
       </div>
       <div class="flight-card__airlines">${escapeHtml([...new Set(flights.map((flight) => flight.airline.nameZh || flight.airline.name))].join(" · "))}</div>
       <div class="flight-flow" style="--route-columns: ${stops.map((_, stopIndex) => stopIndex < stops.length - 1 ? "minmax(0,1fr) minmax(34px,.5fr)" : "minmax(0,1fr)").join(" ")}">
@@ -367,6 +370,8 @@ function renderFlights() {
   $("#flight-dots").innerHTML = journeys.map((_, index) => `<span class="carousel-dot${index === 0 ? " is-active" : ""}"></span>`).join("");
   $("#flight-index").textContent = `1 / ${journeys.length}`;
   renderFlightMaps();
+  renderFlightAlternatives();
+  renderArrivalTips();
 
   const carousel = $("#flight-carousel");
   let scheduled = false;
@@ -390,6 +395,50 @@ function renderFlights() {
       scheduled = false;
     });
   }, { passive: true });
+}
+
+function renderFlightAlternatives() {
+  const data = state.data.flightAlternatives;
+  if (!data || !data.groups || !data.groups.length) return;
+  let host = $("#flight-alternatives");
+  if (!host) {
+    host = document.createElement("details");
+    host.id = "flight-alternatives";
+    host.className = "flight-alternatives";
+    $("#flights").appendChild(host);
+  }
+  host.innerHTML = `
+    <summary>📊 备选航班比价（${escapeHtml(data.collectedAt)}采集 · 点击展开）</summary>
+    <div class="flight-alternatives__body">
+      ${data.groups.map((group) => `
+        <h4>${escapeHtml(group.title)}</h4>
+        <table>
+          ${group.rows.map((row) => `<tr>${row.map((cell, index) => `<${index === 0 ? "th" : "td"}>${escapeHtml(cell)}</${index === 0 ? "th" : "td"}>`).join("")}</tr>`).join("")}
+        </table>
+      `).join("")}
+      <p class="flight-alternatives__note">${escapeHtml(data.note)}</p>
+    </div>`;
+}
+
+function renderArrivalTips() {
+  const tips = state.data.arrivalTips;
+  if (!tips || !tips.sections || !tips.sections.length) return;
+  let host = $("#arrival-tips");
+  if (!host) {
+    host = document.createElement("section");
+    host.id = "arrival-tips";
+    host.className = "arrival-tips";
+    host.setAttribute("aria-labelledby", "arrival-tips-title");
+    $("#flights").appendChild(host);
+  }
+  host.innerHTML = `
+    <h3 id="arrival-tips-title">🛬 ${escapeHtml(tips.title)}</h3>
+    ${tips.sections.map((section) => `
+      <div class="arrival-tip-group">
+        <h4>${escapeHtml(section.icon)} ${escapeHtml(section.title)}</h4>
+        <ul>${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    `).join("")}`;
 }
 
 function updateFlightCountdowns() {
@@ -996,6 +1045,22 @@ async function init() {
     state.config = normalizeTripConfig(state.data.config);
     window.TRAVEL_PLAN_CONFIG = state.config;
     window.TRAVEL_PLAN_DATA = state.data;
+    if (window.L && L.TileLayer && !L.TileLayer.__hermesTileFallback) {
+      L.TileLayer.__hermesTileFallback = true;
+      L.TileLayer.addInitHook(function () {
+        let warned = false;
+        this.on("tileerror", () => {
+          if (warned) return;
+          const host = this._map && this._map.getContainer && this._map.getContainer();
+          if (!host || host.querySelector(".map-fallback-hint")) return;
+          warned = true;
+          const hint = document.createElement("div");
+          hint.className = "map-fallback-hint";
+          hint.innerHTML = `地图图块加载缓慢（国内访问 OSM 常见）。推荐 <a href="${mapsSearch(state.data?.trip?.primaryDestinationName || "越南")}" target="_blank" rel="noopener noreferrer">用 Google 地图查看 ↗</a>`;
+          host.appendChild(hint);
+        });
+      });
+    }
     document.dispatchEvent(new CustomEvent("travel-data-ready", { detail: state.data }));
     applyModuleConfig();
     if (moduleEnabled("overview")) preloadDefaultRouteMap();

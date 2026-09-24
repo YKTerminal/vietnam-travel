@@ -121,9 +121,18 @@ function renderRouteSteps(dayNumber) {
   if (!dayNumber) return "";
   const day = state.data.days.find((d) => d.day === dayNumber);
   if (!day || !day.schedule?.length) return "";
+  const steps = day.schedule.map((s) => {
+    const place = s.placeId ? (state.data.places || []).find((p) => p.id === s.placeId) : null;
+    const tipParts = [];
+    if (place?.howTo) tipParts.push(`<span class="pt-label">💡 怎么玩</span><span>${escapeHtml(place.howTo)}</span>`);
+    if (place?.cost) tipParts.push(`<span class="pt-label">💰 花费</span><span>${escapeHtml(place.cost)}</span>`);
+    if (place?.rainPlan) tipParts.push(`<span class="pt-label">🌧 雨天PlanB</span><span>${escapeHtml(place.rainPlan)}</span>`);
+    const tipBlock = tipParts.length ? `<div class="place-tip">${tipParts.join("")}</div>` : "";
+    return `<li><span class="step-time">${escapeHtml(s.time)}</span><span class="step-type">${stepTypeNames[s.type] || ""}</span><span class="step-text">${escapeHtml(s.text)}</span>${tipBlock}</li>`;
+  }).join("");
   return `<div class="route-steps">
     <h3>${day.date.slice(5).replace("-", "/")} · ${escapeHtml(day.title)} — 路线步骤</h3>
-    <ol>${day.schedule.map((s) => `<li><span class="step-time">${escapeHtml(s.time)}</span><span class="step-type">${stepTypeNames[s.type] || ""}</span><span class="step-text">${escapeHtml(s.text)}</span></li>`).join("")}</ol>
+    <ol>${steps}</ol>
   </div>`;
 }
 

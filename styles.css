@@ -447,3 +447,138 @@ button:focus-visible,a:focus-visible {outline:2px solid var(--lake);outline-offs
   .is-daily .transport-pin svg {width:13px;height:13px;}
   #map-dialog-content .daily-fullscreen {width:100%;min-width:0;}
 }
+
+/* ===== 2026-09-24 优化新增样式 ===== */
+.flight-stop__term {
+  display: inline-block;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1e56c4;
+  margin: 3px 0;
+  white-space: nowrap;
+}
+.flight-card__badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0a7d32;
+  background: #e6f7ec;
+  border: 1px solid #b7e4c7;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-left: 8px;
+}
+.flight-alternatives {
+  margin-top: 18px;
+  border: 1px solid var(--border, #e0e4e0);
+  border-radius: 12px;
+  background: #fbfcfb;
+  padding: 12px 16px;
+}
+.flight-alternatives summary {
+  font-weight: 700;
+  font-size: 15px;
+  color: #092653;
+  cursor: pointer;
+  list-style: none;
+}
+.flight-alternatives summary::-webkit-details-marker { display: none; }
+.flight-alternatives summary::before { content: "▸ "; }
+.flight-alternatives[open] summary::before { content: "▾ "; }
+.flight-alternatives__body { margin-top: 10px; }
+.flight-alternatives__body h4 {
+  font-size: 13px;
+  color: #5b6470;
+  margin: 12px 0 6px;
+}
+.flight-alternatives__body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.flight-alternatives__body th {
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e8ece8;
+  color: #333;
+}
+.flight-alternatives__body td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f0f3f0;
+  color: #5b6470;
+}
+.flight-alternatives__note {
+  font-size: 12px;
+  color: #8a918c;
+  margin-top: 10px;
+}
+.arrival-tips {
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border, #e0e4e0);
+}
+.arrival-tips h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #092653;
+  margin: 0 0 12px;
+}
+.arrival-tip-group {
+  background: #f7faf7;
+  border: 1px solid #e4ebe4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.arrival-tip-group h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f5c33;
+  margin: 0 0 8px;
+}
+.arrival-tip-group ul { margin: 0; padding-left: 18px; }
+.arrival-tip-group li {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #3c4440;
+  margin-bottom: 4px;
+}
+.place-tip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #f5f9f5;
+  border: 1px dashed #cfe3cf;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #3c4440;
+}
+.place-tip .pt-label {
+  font-weight: 700;
+  color: #0f5c33;
+  white-space: nowrap;
+}
+.route-steps li:has(.place-tip) { padding-bottom: 2px; }
+.map-fallback-hint {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(255, 248, 225, 0.96);
+  border: 1px solid #e6c96a;
+  color: #6b5300;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  white-space: nowrap;
+}
+.map-fallback-hint a { color: #1a73e8; }
