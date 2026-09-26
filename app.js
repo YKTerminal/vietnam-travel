@@ -372,6 +372,12 @@ function renderFlights() {
   renderFlightMaps();
   renderFlightAlternatives();
   renderArrivalTips();
+  if (window.matchMedia("(max-width: 699px)").matches && !$(".swipe-hint")) {
+    const hint = document.createElement("div");
+    hint.className = "swipe-hint";
+    hint.textContent = "👈 左右滑动查看 3 程航班";
+    $("#flight-dots")?.after(hint);
+  }
 
   const carousel = $("#flight-carousel");
   let scheduled = false;

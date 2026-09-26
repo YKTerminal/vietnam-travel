@@ -139,7 +139,8 @@ function renderRouteSteps(dayNumber) {
 function travelMapMarkup(source, route) {
   const gmapsUrl = googleMapsRouteUrl(route);
   return `<div class="travel-map-block ${route ? "is-daily" : "is-overview"}">
-    <div class="leaflet-map-host" id="route-leaflet-map" data-leaflet-day="${route ? route.day : 0}" style="height:440px;border-radius:12px;overflow:hidden"></div>
+    <div class="leaflet-map-host" id="route-leaflet-map" data-leaflet-day="${route ? route.day : 0}"></div>
+    <button type="button" class="map-expand-btn" data-map-expand>🔍 放大查看地图</button>
     <div class="map-utility"><span>${route ? "当天路线 · 点标记看地点" : "真实地图 · 点标记看地点"}</span><a href="${gmapsUrl}" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#1a73e8;margin-left:10px">在 Google 地图中打开 ↗</a></div>
   </div>`;
 }
@@ -150,6 +151,29 @@ function renderLeafletMap(dayNumber) {
   const mapPlaces = state.data?.map?.places || [];
   const mapRoutes = state.data?.map?.routes || [];
   const map = L.map(host, { scrollWheelZoom: false });
+  const isMobile = window.matchMedia("(max-width: 699px)").matches;
+  if (isMobile) {
+    map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+  }
+  const mapBlock = host.closest(".travel-map-block");
+  const setMapExpand = (on) => {
+    mapBlock?.classList.toggle("is-expanded", on);
+    const btn = mapBlock?.querySelector("[data-map-expand]");
+    if (btn) btn.textContent = on ? "✕ 收起地图" : "🔍 放大查看地图";
+    if (isMobile) {
+      map.dragging[on ? "enable" : "disable"]();
+      map.touchZoom[on ? "enable" : "disable"]();
+      map.doubleClickZoom[on ? "enable" : "disable"]();
+    }
+    setTimeout(() => map.invalidateSize(), 80);
+  };
+  mapBlock?.addEventListener("click", (event) => {
+    if (!isMobile) return;
+    if (event.target.closest("a, .leaflet-interactive, .leaflet-control")) return;
+    setMapExpand(!mapBlock.classList.contains("is-expanded"));
+  });
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "&copy; OpenStreetMap" }).addTo(map);
   const latlngs = [];
   if (dayNumber) {
