@@ -200,7 +200,7 @@
         {
           "time": "05:20",
           "type": "note",
-          "text": "出关+取行李（电子签人工通道约30-60分钟；出关后到达厅有SIM柜台+ATM）"
+          "text": "出关+取行李（电子签通道约30-60分钟）"
         },
         {
           "time": "06:30",
@@ -210,7 +210,7 @@
         {
           "time": "07:00",
           "type": "transfer",
-          "text": "Grab去市区AMAROU（约30分钟，¥30-40），寄存行李+问前台能否提前入住",
+          "text": "Grab去市区AMAROU（约30分钟，¥30-40），寄存行李+问前台能否提前入住（正常14:00入住）",
           "placeId": "amarou"
         },
         {
@@ -221,19 +221,19 @@
         {
           "time": "09:30",
           "type": "rest",
-          "text": "补觉：Miu Miu Spa 90-120分钟全身按摩+休息，睡一觉（9:30开门，红眼后回血关键）",
+          "text": "补觉【店待定】：Miu Miu Spa（第一郡，9:30开门，90分钟约¥200）或酒店提前入住直接睡——以当天体力定",
           "placeId": "miumiu"
         },
         {
           "time": "11:30",
           "type": "restaurant",
-          "text": "咖啡+午餐：Anan Saigon 米其林一星越南菜（需提前订位，人均¥150-230）",
-          "placeId": "anan"
+          "text": "咖啡+午餐：Bún Chả 145（米其林 Bib Gourmand，人均¥30-60）；原计划的 Anan 米其林一星只营业晚餐，想吃可改 Day2 晚餐",
+          "placeId": "buncha145"
         },
         {
           "time": "13:30",
           "type": "check-in",
-          "text": "AMAROU 正式入住 + 午休（还困就再睡1-2小时）",
+          "text": "AMAROU 正式入住（14:00起）+ 午休（还困就再睡）",
           "placeId": "amarou"
         },
         {
@@ -243,20 +243,20 @@
           "placeId": "post"
         },
         {
-          "time": "18:00",
-          "type": "walk",
-          "text": "滨城市场：买纪念品+小吃（砍价从5折起）",
-          "placeId": "benthanh"
+          "time": "17:30",
+          "type": "restaurant",
+          "text": "海鲜晚餐：OANH CUA（214/1 Nguyễn Trãi，热门排队店，尽量17:30前到避排队；备选 Ốc Đào 2）"
         },
         {
-          "time": "19:30",
-          "type": "restaurant",
-          "text": "海鲜晚餐：OANH CUA（214/1 Nguyễn Trãi，螃蟹火锅）或 Ốc Đào 2（海螺海鲜）"
+          "time": "19:00",
+          "type": "walk",
+          "text": "滨城夜市：吃完海鲜再去逛，买纪念品+小吃（室内市场约19:00关，晚上逛周边夜市摊）",
+          "placeId": "benthanh"
         },
         {
           "time": "21:30",
           "type": "rest",
-          "text": "回酒店早睡，为第二天景点游充电"
+          "text": "回酒店休息，为第二天景点游充电"
         }
       ]
     },
@@ -269,18 +269,18 @@
       ],
       "schedule": [
         {
-          "time": "07:30",
+          "time": "08:30",
           "type": "restaurant",
-          "text": "早餐：Bánh Mì Bà Huynh（197A Nguyễn Trãi，与 Hồng Hoa 对比）"
+          "text": "早餐：Bánh Mì Bà Huynh（197A Nguyễn Trãi）；时间灵活，8:30-9:00出门均可"
         },
         {
-          "time": "09:00",
+          "time": "09:30",
           "type": "attraction",
           "text": "统一宫（约¥17，室内+天台直升机坪，1.5小时）",
           "placeId": "reunify"
         },
         {
-          "time": "10:30",
+          "time": "10:45",
           "type": "attraction",
           "text": "战争遗迹博物馆（约¥10，全室内展馆，1小时）",
           "placeId": "war"
@@ -288,41 +288,36 @@
         {
           "time": "12:00",
           "type": "restaurant",
-          "text": "午餐：Phở Hòa Pasteur（260C Pasteur，传统河粉）"
+          "text": "午餐：Phở Hòa Pasteur（260C Pasteur）——1968年老字号，米其林 Bib Gourmand 2024 入选，普通碗约¥26，营业6:00-22:30"
         },
         {
           "time": "13:30",
           "type": "walk",
-          "text": "奥黛体验：租借店选款（¥70-180/人）→ 穿去中央邮局/书街拍照（2小时）",
+          "text": "奥黛体验（视当天天气/精力：下午或上午均可；租借¥70-180/人，穿去中央邮局/书街拍照）",
           "placeId": "aodaishop"
         },
         {
           "time": "16:00",
           "type": "walk",
-          "text": "咖啡公寓+阮惠步行街：喝点好喝的，临街窗边看街景",
+          "text": "咖啡公寓+阮惠步行街（必去：喝点好喝的，临街窗边看街景）",
           "placeId": "coffee"
         },
         {
           "time": "17:15",
           "type": "walk",
-          "text": "落日巴士：City Sightseeing 夜游班（歌剧院上车，17:30发车看日落+华灯初上，45分钟一圈）",
+          "text": "落日巴士（必去：歌剧院上车，17:30班次看日落+华灯初上，45分钟一圈）",
           "placeId": "operahouse"
         },
         {
           "time": "18:45",
-          "type": "walk",
-          "text": "42 Tôn Thất Thiệp 本地品牌街：一层层逛，买1-2件越南设计",
-          "placeId": "tontatthiep"
+          "type": "restaurant",
+          "text": "晚餐（巴士结束直接去）：Bếp Mẹ Ỉn 越南家常菜；或改 Anan Saigon 米其林一星（需官网预订，17:30场）"
         },
         {
           "time": "20:30",
-          "type": "restaurant",
-          "text": "晚餐：Bếp Mẹ Ỉn（越南家常菜）或 Bún Chả 145（米其林 Bib Gourmand）"
-        },
-        {
-          "time": "21:30",
-          "type": "rest",
-          "text": "回酒店休息"
+          "type": "walk",
+          "text": "可选：42 Tôn Thất Thiệp 本地品牌街（一层层逛，买1-2件越南设计）",
+          "placeId": "tontatthiep"
         }
       ]
     },
@@ -336,64 +331,49 @@
       ],
       "schedule": [
         {
-          "id": "d3-s1",
-          "time": "07:30",
-          "type": "restaurant",
-          "text": "早餐：最后一顿 Bánh Mì（Hồng Hoa 或 Bà Huynh 补完）"
-        },
-        {
-          "id": "d3-s2",
-          "time": "09:00",
-          "type": "walk",
-          "text": "最后购物：Saigon Square → 滨城市场 → 咖啡休息",
-          "placeId": "saigonsquare"
-        },
-        {
-          "id": "d3-s3",
-          "time": "11:30",
+          "time": "09:30",
           "type": "check-out",
-          "text": "AMAROU 退房取行李",
+          "text": "睡到自然醒，09:30左右退房出门（AMAROU 最晚退房12:00，check24平台数据；行李寄存前台）",
           "placeId": "amarou"
         },
         {
-          "id": "d3-s4",
-          "time": "12:00",
-          "type": "restaurant",
-          "text": "轻午餐（Pho / Bánh Mì / 咖啡）"
+          "time": "10:00",
+          "type": "walk",
+          "text": "逛逛街 + 法棍早餐（Bánh Mì Hồng Hoa 或 Bà Huynh 补完）"
         },
         {
-          "id": "d3-s5",
+          "time": "13:00",
+          "type": "restaurant",
+          "text": "午餐+咖啡：The Workshop Coffee（27 Ngô Đức Kế 3楼；有简餐：班尼迪克蛋/汉堡/沙拉+招牌盐咖啡，可当午饭吃）",
+          "placeId": "workshop"
+        },
+        {
           "time": "15:30",
           "type": "transfer",
-          "text": "酒店 → 新山一机场（Grab约30分钟，约¥30）",
+          "text": "Grab → 新山一机场（约30分钟，¥30-40）",
           "placeId": "sgn"
         },
         {
-          "id": "d3-s6",
           "time": "17:20",
           "type": "flight",
-          "text": "胡志明(SGN) → 富国岛(PQC) VJ331（越捷航空，约¥133-150）",
+          "text": "胡志明(SGN) → 富国岛(PQC) VJ331（越捷航空）",
           "placeId": "pqc"
         },
         {
-          "id": "d3-s7",
           "time": "18:20",
           "type": "flight",
-          "text": "抵达富国岛机场",
-          "placeId": "pqc"
+          "text": "抵达富国岛机场"
         },
         {
-          "id": "d3-s8",
-          "time": "19:00",
-          "type": "transfer",
-          "text": "机场 → ZAO Hotel（Grab约40分钟，约¥60）",
+          "time": "19:30",
+          "type": "check-in",
+          "text": "入住 ZAO Hotel（机场Grab约40分钟，¥60）",
           "placeId": "zao"
         },
         {
-          "id": "d3-s9",
           "time": "20:00",
-          "type": "check-in",
-          "text": "ZAO Hotel 入住 + Sunset Town 夜景（Kiss Bridge 灯光/烟花，以当天场次为准）",
+          "type": "note",
+          "text": "晚餐待定（富国岛餐厅等你确认行程后一起定）；可选 Sunset Town 夜景散步",
           "placeId": "sunset"
         }
       ]
@@ -406,6 +386,11 @@
         "富国岛"
       ],
       "schedule": [
+        {
+          "time": "--",
+          "type": "note",
+          "text": "【初稿·待确认】富国岛行程为初步方案，等你确认后定稿；跳岛如跟团/包船建议提前1天预订"
+        },
         {
           "time": "07:00",
           "type": "restaurant",
@@ -451,6 +436,11 @@
       ],
       "schedule": [
         {
+          "time": "--",
+          "type": "note",
+          "text": "【初稿·待确认】以下安排等你确认后定稿"
+        },
+        {
           "time": "08:30",
           "type": "restaurant",
           "text": "早餐 + 退房（行李寄存 ZAO 前台）",
@@ -494,6 +484,11 @@
         "富国岛"
       ],
       "schedule": [
+        {
+          "time": "--",
+          "type": "note",
+          "text": "【初稿·待确认】以下安排等你确认后定稿"
+        },
         {
           "time": "09:00",
           "type": "restaurant",
@@ -788,8 +783,8 @@
         "lat": 10.774,
         "lng": 106.7035
       },
-      "howTo": "胡志明精品咖啡天花板，澳白和手冲是招牌，上午10点前人少、下午常排队，约1小时",
-      "cost": "约¥20-30/杯",
+      "howTo": "精品咖啡老牌（27 Ngô Đức Kế 老楼3楼，8:00-22:00）；有简餐可当午餐：招牌班尼迪克蛋（₫175k）、汉堡/沙拉/炖饭、提拉米苏；盐咖啡（₫80k）是招牌",
+      "cost": "咖啡约¥15-25；简餐约¥30-60/份（2024-2026 实测）",
       "rainPlan": "全室内"
     },
     {
@@ -862,7 +857,7 @@
       "name": "Miu Miu Spa 1（第一郡）",
       "category": "spa",
       "address": "04 Chu Manh Trinh, Bến Nghé, Quận 1",
-      "howTo": "落地补觉首选：90分钟越式全身按摩（₫700k起，约¥200），闭眼睡一觉；店里安静、有空调，按摩完满血复活",
+      "howTo": "红眼后补觉备选之一：90分钟越式全身按摩（₫700k起，约¥200），闭眼睡一觉；店里安静、有空调，按摩完满血复活",
       "cost": "90分钟约¥200/人；30分钟肩颈约¥85/人（官方价目，2024）",
       "rainPlan": "全室内，雨天照常（本计划里的固定节目）"
     },
@@ -871,8 +866,8 @@
       "name": "Anan Saigon（米其林一星）",
       "category": "restaurant",
       "address": "89 Tôn Thất Đạm, Quận 1（滨城市场旁）",
-      "howTo": "胡志明唯一的米其林一星越南菜（主厨 Peter Cuong Franklin，2023-2025 蝉联）；招牌：Bánh Xèo Taco、Pho 鸡尾酒；必须提前官网/电话订位",
-      "cost": "午餐人均约¥150-230（₫₫ 档）",
+      "howTo": "胡志明唯一米其林一星越南菜（2023-2025蝉联，主厨 Peter Cuong Franklin）；⚠️只营业晚餐 17:00-23:00，周一休；Tasting 需提前官网预订（5:30pm/8:30pm 两场）",
+      "cost": "晚餐单点人均约¥150-300；Tasting US$115/人起（官网价，2026）",
       "rainPlan": "室内餐厅，雨天照常"
     },
     {
@@ -901,6 +896,15 @@
       "howTo": "富国岛最大夜市：海鲜烧烤大排档+珍珠/伴手礼摊位，边吃边逛2小时；离 Famiana 车程约20分钟",
       "cost": "人均¥50-150（海鲜按斤称）",
       "rainPlan": "半露天，小雨照常；暴雨改酒店餐厅"
+    },
+    {
+      "id": "buncha145",
+      "name": "Bún Chả 145 Bùi Viện（米其林 Bib Gourmand）",
+      "category": "restaurant",
+      "address": "145 Bùi Viện, Phạm Ngũ Lão, Quận 1",
+      "howTo": "炭烤猪肉米线（奥巴马访越同款），胡志明最知名 Bún Chả；米其林 Bib Gourmand 入选；午餐正合适",
+      "cost": "人均约¥30-60（₫100k-200k）",
+      "rainPlan": "临街座位，小雨有棚；大雨改室内店"
     }
   ],
   "restaurants": [
