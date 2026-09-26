@@ -664,3 +664,108 @@ button:focus-visible,a:focus-visible {outline:2px solid var(--lake);outline-offs
   .tl-place { font-size: 12.5px; }
   .tip-row { font-size: 13px; }
 }
+
+/* ===== 2026-09-26 便捷性：地点按钮/问路卡/紧急条/换算器/吃什么 ===== */
+.place-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pbtn {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12.5px; font-weight: 600; line-height: 1;
+  padding: 8px 10px; border-radius: 9px; border: 1px solid #d7e0d7;
+  background: #fbfdfb; color: #234; text-decoration: none; cursor: pointer;
+  min-height: 30px;
+}
+.pbtn:active { transform: scale(0.97); }
+.pbtn-nav { background: #e8f0fe; border-color: #b8d0f2; color: #1a56c4; }
+.pbtn-book { background: #fdeeee; border-color: #f2c4c4; color: #b3281f; }
+.pbtn-detail { background: #f2f4fb; border-color: #d3d8ee; color: #414a8f; }
+.tl-meta { font-size: 12px; color: #5b6a63; margin-top: 5px; line-height: 1.5; }
+.tl-meta-note { color: #8a6d1a; background: #fdf7e8; border-radius: 7px; padding: 5px 8px; }
+/* 问路卡弹层 */
+.vc-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(8, 15, 25, 0.72);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.vc-overlay[hidden] { display: none; }
+.vc-card {
+  width: 100%; max-width: 430px; background: #0e1a2a; color: #fff;
+  border-radius: 18px; padding: 22px 20px; text-align: center;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+}
+.vc-lang { font-size: 13px; color: #9fb4cc; margin-bottom: 14px; }
+.vc-name { font-size: 26px; font-weight: 800; line-height: 1.35; word-break: break-word; }
+.vc-addr { font-size: 17px; line-height: 1.5; color: #e8eef6; margin-top: 10px; word-break: break-word; }
+.vc-cn { font-size: 13px; color: #8aa0b8; margin-top: 12px; }
+.vc-close {
+  margin-top: 18px; font-size: 14px; font-weight: 700;
+  padding: 10px 26px; border-radius: 999px; border: 1px solid #3d5066;
+  background: #1b2c42; color: #dbe6f2; cursor: pointer;
+}
+/* toast */
+#tl-toast {
+  position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px);
+  background: rgba(20, 30, 42, 0.94); color: #fff; font-size: 13.5px; font-weight: 600;
+  padding: 10px 16px; border-radius: 999px; z-index: 9998; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: 88vw; text-align: center;
+}
+#tl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* 紧急电话条 */
+.emer-bar {
+  background: linear-gradient(180deg, #b3261e, #8f1d16);
+  border-radius: 14px; padding: 12px 14px; margin: 0 0 18px; color: #fff;
+  box-shadow: 0 6px 18px rgba(143, 29, 22, 0.28);
+}
+.emer-title { font-size: 13.5px; font-weight: 800; margin-bottom: 9px; letter-spacing: 0.02em; }
+.emer-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.emer-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12.5px; font-weight: 700; padding: 8px 11px; border-radius: 9px;
+  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.35);
+  color: #fff; text-decoration: none; cursor: pointer; line-height: 1;
+}
+.emer-btn:active { background: rgba(255,255,255,0.28); }
+.emer-note { font-size: 11px; color: #f5c8c4; margin-top: 8px; }
+/* 换算器 */
+.fx-widget {
+  background: #f4f8f4; border: 1px solid #dce8dc; border-radius: 14px;
+  padding: 14px 16px; margin-top: 18px;
+}
+.fx-widget h4 { margin: 0 0 12px; font-size: 14.5px; color: #0f3d2a; }
+.fx-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.fx-row label { flex: none; width: 92px; font-size: 13px; font-weight: 700; color: #3a4d42; }
+.fx-row input {
+  flex: 1; min-width: 0; font-size: 16px; padding: 9px 12px;
+  border: 1px solid #c9d8c9; border-radius: 9px; background: #fff; color: #15261c;
+}
+.fx-quick { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
+.fx-quick button {
+  font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 8px;
+  border: 1px solid #cfe0cf; background: #fff; color: #2a4a36; cursor: pointer;
+}
+.fx-rate-line { font-size: 11.5px; color: #66776c; margin-top: 10px; }
+#fx-rate-btn {
+  border: none; background: none; color: #1a56c4; font-weight: 700;
+  font-size: 11.5px; text-decoration: underline; cursor: pointer; padding: 0;
+}
+/* 今天吃什么 */
+.food-pick {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  background: #fff8ec; border: 1px dashed #ecd9a8; border-radius: 12px;
+  padding: 10px 12px; margin: 0 0 14px;
+}
+.food-pick-title { font-size: 13px; font-weight: 800; color: #8a5a12; flex: none; }
+.food-chip {
+  font-size: 12px; font-weight: 600; padding: 7px 10px; border-radius: 999px;
+  border: 1px solid #e6cf96; background: #fffdf6; color: #6b4a10; cursor: pointer;
+  max-width: 62vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.food-chip.is-picked, .food-dice.is-picked { background: #8a5a12; border-color: #8a5a12; color: #fff; }
+.food-dice {
+  font-size: 12px; font-weight: 800; padding: 7px 12px; border-radius: 999px;
+  border: 1px solid #8a5a12; background: #8a5a12; color: #fff; cursor: pointer;
+}
+.tl-item.flash .tl-card { animation: tl-flash 1.6s ease; }
+@keyframes tl-flash {
+  0%, 60% { box-shadow: 0 0 0 3px rgba(232, 164, 40, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 164, 40, 0); }
+}

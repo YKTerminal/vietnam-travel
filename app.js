@@ -426,6 +426,78 @@ function renderFlightAlternatives() {
     </div>`;
 }
 
+function currencyWidgetHtml() {
+  return `
+  <div class="fx-widget" id="fx-widget">
+    <h4>💱 越南盾 ↔ 人民币 换算</h4>
+    <div class="fx-row"><label for="fx-vnd">越南盾 VND</label><input id="fx-vnd" type="number" inputmode="decimal" placeholder="如 150000"></div>
+    <div class="fx-row"><label for="fx-cny">人民币 CNY</label><input id="fx-cny" type="number" inputmode="decimal" placeholder="如 45"></div>
+    <div class="fx-quick">
+      <button type="button" data-fx-quick="100000">10万盾</button>
+      <button type="button" data-fx-quick="500000">50万盾</button>
+      <button type="button" data-fx-quick="1000000">100万盾</button>
+      <button type="button" data-fx-quick="5000000">500万盾</button>
+    </div>
+    <div class="fx-rate-line">汇率 <button type="button" id="fx-rate-btn" title="点击修改汇率">1盾 = ¥0.000285</button>（默认参考值，到当地可按实际汇率点改）</div>
+  </div>`;
+}
+
+function bindCurrency() {
+  const vnd = $("#fx-vnd"), cny = $("#fx-cny");
+  if (!vnd || !cny) return;
+  const rateBtn = $("#fx-rate-btn");
+  let rate = parseFloat(localStorage.getItem("vn-fx-rate") || "0.000285");
+  const fmt = (n) => String(Math.round(n * 100) / 100);
+  const syncBtn = () => { rateBtn.textContent = "1盾 = ¥" + rate; };
+  syncBtn();
+  vnd.addEventListener("input", () => { cny.value = vnd.value ? fmt(vnd.value * rate) : ""; });
+  cny.addEventListener("input", () => { vnd.value = cny.value ? fmt(cny.value / rate) : ""; });
+  document.addEventListener("click", (event) => {
+    const q = event.target.closest("[data-fx-quick]");
+    if (q) { vnd.value = q.dataset.fxQuick; vnd.dispatchEvent(new Event("input")); return; }
+    if (event.target.closest("#fx-rate-btn")) {
+      const v = window.prompt("输入汇率：1盾 = 多少人民币", String(rate));
+      if (v && !isNaN(parseFloat(v)) && parseFloat(v) > 0) {
+        rate = parseFloat(v);
+        localStorage.setItem("vn-fx-rate", String(rate));
+        syncBtn();
+        if (vnd.value) cny.value = fmt(vnd.value * rate);
+      }
+    }
+  });
+}
+
+function renderEmergencyBar() {
+  const host = $("#flights");
+  if (!host) return;
+  $("#emer-bar")?.remove();
+  const saved = localStorage.getItem("vn-emergency-phones") || "";
+  const phoneLinks = saved.split(",").map((s) => s.trim()).filter(Boolean)
+    .map((n) => `<a class="emer-btn" href="tel:${escapeHtml(n)}">☎️ ${escapeHtml(n)}</a>`).join("");
+  const bar = document.createElement("div");
+  bar.id = "emer-bar";
+  bar.className = "emer-bar";
+  bar.innerHTML = `
+    <div class="emer-title">🚨 紧急电话（点一下直接拨打）</div>
+    <div class="emer-row">
+      <a class="emer-btn" href="tel:113">🚨报警 113</a>
+      <a class="emer-btn" href="tel:115">🚑急救 115</a>
+      <a class="emer-btn" href="tel:+861012308">🇨🇳领保 12308</a>
+      <a class="emer-btn" href="tel:+8428908002226">🏛️驻胡总领馆</a>
+      <button type="button" class="emer-btn" id="emer-add">☎️记同行人电话</button>
+      ${phoneLinks}
+    </div>
+    <div class="emer-note">同行人电话只存在你手机浏览器本地，不会上传。</div>`;
+  host.prepend(bar);
+  $("#emer-add").addEventListener("click", () => {
+    const v = window.prompt("输入同行人手机号（多个用逗号分隔）", saved);
+    if (v !== null) {
+      localStorage.setItem("vn-emergency-phones", v.replace(/[^0-9+,\s]/g, ""));
+      renderEmergencyBar();
+    }
+  });
+}
+
 function renderArrivalTips() {
   const tips = state.data.arrivalTips;
   if (!tips || !tips.sections || !tips.sections.length) return;
@@ -444,7 +516,8 @@ function renderArrivalTips() {
         <h4>${escapeHtml(section.icon)} ${escapeHtml(section.title)}</h4>
         <ul>${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
       </div>
-    `).join("")}`;
+    `).join("")}
+    ${currencyWidgetHtml()}`;
 }
 
 function updateFlightCountdowns() {
@@ -1072,6 +1145,8 @@ async function init() {
     if (moduleEnabled("overview")) preloadDefaultRouteMap();
     renderHero();
     if (moduleEnabled("flights")) renderFlights();
+    renderEmergencyBar();
+    bindCurrency();
     if (moduleEnabled("overview")) setupRouteExplorer();
     if (moduleEnabled("itinerary")) {
       setupPlaceMap();

@@ -117,6 +117,34 @@ const stepTypeNames = {
   rest: "😴 休息", note: "📝 备注"
 };
 
+function placeButtons(place) {
+  if (!place) return "";
+  const btns = [];
+  if (place.mapQuery) {
+    btns.push(`<a class="pbtn pbtn-nav" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.mapQuery)}" target="_blank" rel="noopener noreferrer" title="到越南后可用">📍导航</a>`);
+  }
+  if (place.bookingUrl) {
+    const isTicket = ["honthom", "kissbridge"].includes(place.id);
+    btns.push(`<a class="pbtn pbtn-book" href="${place.bookingUrl}" target="_blank" rel="noopener noreferrer">${isTicket ? "🎫买票" : "🕐预约"}</a>`);
+  }
+  if (place.detailUrl) btns.push(`<a class="pbtn pbtn-detail" href="${place.detailUrl}" target="_blank" rel="noopener noreferrer">🔗详情</a>`);
+  if (place.mapQuery) {
+    btns.push(`<button type="button" class="pbtn" data-ask-driver="${escapeHtml(place.id)}">🗣️给司机看</button>`);
+    btns.push(`<button type="button" class="pbtn" data-copy-addr="${escapeHtml(place.id)}">📋复制</button>`);
+    btns.push(`<button type="button" class="pbtn" data-grab="${escapeHtml(place.id)}">🚗Grab</button>`);
+  }
+  return `<div class="place-btns">${btns.join("")}</div>`;
+}
+
+function placeMetaLines(place) {
+  if (!place) return "";
+  const lines = [];
+  if (place.hours) lines.push(`<div class="tl-meta">⏰ ${escapeHtml(place.hours)}</div>`);
+  if (place.ticket) lines.push(`<div class="tl-meta">🎫 ${escapeHtml(place.ticket)}</div>`);
+  if (place.note) lines.push(`<div class="tl-meta tl-meta-note">ℹ️ ${escapeHtml(place.note)}</div>`);
+  return lines.join("");
+}
+
 function renderRouteSteps(dayNumber) {
   if (!dayNumber) return "";
   const day = state.data.days.find((d) => d.day === dayNumber);
@@ -140,14 +168,26 @@ function renderRouteSteps(dayNumber) {
     if (place?.cost) tips.push(`<div class="tip-row tip-cost"><span class="tip-ico">💰</span><span class="tip-label">花费</span><span class="tip-body">${escapeHtml(place.cost)}</span></div>`);
     if (place?.rainPlan) tips.push(`<div class="tip-row tip-rain"><span class="tip-ico">🌧️</span><span class="tip-label">雨天</span><span class="tip-body">${escapeHtml(place.rainPlan)}</span></div>`);
     const placeName = place?.name ? `<div class="tl-place">📍 ${escapeHtml(place.name)}</div>` : "";
+    const meta = placeMetaLines(place);
+    const btns = placeButtons(place);
     return `<li class="tl-item ${typeClass[s.type] || "tl-note"}">
       <div class="tl-time">${escapeHtml(s.time)}</div>
       <div class="tl-rail"><span class="tl-dot">${typeIcon[s.type] || "📝"}</span></div>
-      <div class="tl-card"><div class="tl-text">${escapeHtml(s.text)}</div>${placeName}${tips.join("")}</div>
+      <div class="tl-card"><div class="tl-text">${escapeHtml(s.text)}</div>${placeName}${meta}${tips.join("")}${btns}</div>
     </li>`;
   }).join("");
+  let foodStrip = "";
+  const foodSteps = day.schedule.map((s, i) => ({ s, i })).filter(({ s }) => s.type === "restaurant" && s.placeId);
+  if (foodSteps.length > 1) {
+    const chips = foodSteps.map(({ s, i }) => {
+      const p = (state.data.places || []).find((x) => x.id === s.placeId);
+      return `<button type="button" class="food-chip" data-food-day="${day.day}" data-food-idx="${i}">${p?.name || s.text}</button>`;
+    }).join("");
+    foodStrip = `<div class="food-pick"><span class="food-pick-title">🍽️ 今天吃什么</span>${chips}<button type="button" class="food-dice" data-food-dice="${day.day}">🎲 帮我选</button></div>`;
+  }
   return `<div class="route-steps">
     <h3 class="route-steps-title">${day.date.slice(5).replace("-", "/")} · ${escapeHtml(day.title)}</h3>
+    ${foodStrip}
     <ol class="timeline">${steps}</ol>
   </div>`;
 }
@@ -355,3 +395,85 @@ function setupRouteExplorer() {
   $("#map-dialog").addEventListener("close", () => closePopover());
   $$(".day-detail:not([hidden])").forEach(activateDayMaps);
 }
+
+/* ==== 便捷按钮：问路卡 / 复制 / Grab / 吃什么（2026-09-26） ==== */
+const VC_MODAL_HTML = `
+<div class="vc-overlay" id="vc-overlay" hidden>
+  <div class="vc-card" role="dialog" aria-modal="true" aria-label="给司机看的地址">
+    <div class="vc-lang">🇻🇳 请给司机 / 店员看这张卡</div>
+    <div class="vc-name" id="vc-name"></div>
+    <div class="vc-addr" id="vc-addr"></div>
+    <div class="vc-cn" id="vc-cn"></div>
+    <button type="button" class="vc-close" data-vc-close>✕ 关闭</button>
+  </div>
+</div>`;
+if (!document.getElementById("vc-overlay")) {
+  document.body.insertAdjacentHTML("beforeend", VC_MODAL_HTML);
+}
+function showToast(msg) {
+  let t = document.getElementById("tl-toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "tl-toast";
+    t.setAttribute("role", "status");
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add("show");
+  window.clearTimeout(t._timer);
+  t._timer = window.setTimeout(() => t.classList.remove("show"), 2600);
+}
+document.addEventListener("click", (event) => {
+  const ov = document.getElementById("vc-overlay");
+  const ask = event.target.closest("[data-ask-driver]");
+  if (ask) {
+    const p = (state.data.places || []).find((x) => x.id === ask.dataset.askDriver);
+    if (p && ov) {
+      document.getElementById("vc-name").textContent = p.nameVi || p.name || "";
+      document.getElementById("vc-addr").textContent = p.addressVi || "";
+      document.getElementById("vc-cn").textContent = "中文：(" + (p.name || "") + ")";
+      ov.hidden = false;
+    }
+    return;
+  }
+  const copy = event.target.closest("[data-copy-addr]");
+  const grab = event.target.closest("[data-grab]");
+  if (copy || grab) {
+    const el = copy || grab;
+    const pid = el.dataset.copyAddr || el.dataset.grab;
+    const p = (state.data.places || []).find((x) => x.id === pid);
+    const txt = [p?.nameVi, p?.addressVi].filter(Boolean).join(" · ");
+    if (txt && navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
+    if (copy) { showToast("已复制：" + txt); return; }
+    showToast("已复制地址，尝试打开Grab…若没反应，打开Grab粘贴搜索");
+    window.setTimeout(() => { try { window.location.href = "grab://"; } catch (e) { /* 无App则提示 */ } }, 500);
+    return;
+  }
+  const vcClose = event.target.closest("[data-vc-close]");
+  if (vcClose || (ov && event.target === ov)) { if (ov) ov.hidden = true; return; }
+  const dice = event.target.closest("[data-food-dice]");
+  if (dice) {
+    const day = Number(dice.dataset.foodDice);
+    const chips = [...document.querySelectorAll(`.food-chip[data-food-day="${day}"]`)];
+    if (!chips.length) return;
+    chips.forEach((c) => c.classList.remove("is-picked"));
+    const winChip = chips[Math.floor(Math.random() * chips.length)];
+    winChip.classList.add("is-picked");
+    showToast("就吃这家 🍽️ " + winChip.textContent.trim());
+    return;
+  }
+  const chip = event.target.closest(".food-chip");
+  if (chip) {
+    const day = Number(chip.dataset.foodDay);
+    const idx = Number(chip.dataset.foodIdx);
+    document.querySelectorAll(".food-chip").forEach((c) => c.classList.remove("is-picked"));
+    chip.classList.add("is-picked");
+    const li = document.querySelectorAll(".tl-item")[idx];
+    if (li) {
+      li.scrollIntoView({ behavior: "smooth", block: "center" });
+      li.classList.add("flash");
+      window.setTimeout(() => li.classList.remove("flash"), 1600);
+    }
+    return;
+  }
+});

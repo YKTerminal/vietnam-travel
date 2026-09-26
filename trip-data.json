@@ -245,7 +245,8 @@
         {
           "time": "17:30",
           "type": "restaurant",
-          "text": "海鲜晚餐：OANH CUA（214/1 Nguyễn Trãi，热门排队店，尽量17:30前到避排队；备选 Ốc Đào 2）"
+          "text": "海鲜晚餐：OANH CUA（214/1 Nguyễn Trãi，热门排队店，尽量17:30前到避排队；备选 Ốc Đào 2）",
+          "placeId": "oanhcua"
         },
         {
           "time": "19:00",
@@ -271,7 +272,8 @@
         {
           "time": "08:30",
           "type": "restaurant",
-          "text": "早餐：Bánh Mì Bà Huynh（197A Nguyễn Trãi）；时间灵活，8:30-9:00出门均可"
+          "text": "早餐：Bánh Mì Bà Huynh（197A Nguyễn Trãi）；时间灵活，8:30-9:00出门均可",
+          "placeId": "bahuynh"
         },
         {
           "time": "09:30",
@@ -288,7 +290,8 @@
         {
           "time": "12:00",
           "type": "restaurant",
-          "text": "午餐：Phở Hòa Pasteur（260C Pasteur）——1968年老字号，米其林 Bib Gourmand 2024 入选，普通碗约¥26，营业6:00-22:30"
+          "text": "午餐：Phở Hòa Pasteur（260C Pasteur）——1968年老字号，米其林 Bib Gourmand 2024 入选，普通碗约¥26，营业6:00-22:30",
+          "placeId": "phohoa"
         },
         {
           "time": "13:30",
@@ -311,7 +314,8 @@
         {
           "time": "18:45",
           "type": "restaurant",
-          "text": "晚餐（巴士结束直接去）：Bếp Mẹ Ỉn 越南家常菜；或改 Anan Saigon 米其林一星（需官网预订，17:30场）"
+          "text": "晚餐（巴士结束直接去）：Bếp Mẹ Ỉn 越南家常菜；或改 Anan Saigon 米其林一星（需官网预订，17:30场）",
+          "placeId": "bepmein"
         },
         {
           "time": "20:30",
@@ -339,7 +343,8 @@
         {
           "time": "10:00",
           "type": "walk",
-          "text": "逛逛街 + 法棍早餐（Bánh Mì Hồng Hoa 或 Bà Huynh 补完）"
+          "text": "逛逛街 + 法棍早餐（Bánh Mì Hồng Hoa 或 Bà Huynh 补完）",
+          "placeId": "honghoa"
         },
         {
           "time": "13:00",
@@ -573,7 +578,10 @@
       "geo": {
         "lat": 22.6393,
         "lng": 113.8107
-      }
+      },
+      "nameVi": "深圳宝安国际机场 (SZX)",
+      "addressVi": "Tầng 3, Ga quốc tế, Sân bay Bảo An, Thâm Quyến, Trung Quốc",
+      "mapQuery": "深圳宝安国际机场 (SZX) Tầng 3, Ga quốc tế, Sân bay Bảo An, Thâm Quyến, Trung Quốc"
     },
     {
       "id": "hkg",
@@ -583,7 +591,10 @@
       "geo": {
         "lat": 22.308,
         "lng": 113.9185
-      }
+      },
+      "nameVi": "Sân bay quốc tế Hồng Kông (HKG)",
+      "addressVi": "1 Sky Plaza Rd, Chek Lap Kok, Hồng Kông",
+      "mapQuery": "Sân bay quốc tế Hồng Kông (HKG) 1 Sky Plaza Rd, Chek Lap Kok, Hồng Kông"
     },
     {
       "id": "sgn",
@@ -593,7 +604,10 @@
       "geo": {
         "lat": 10.8188,
         "lng": 106.652
-      }
+      },
+      "nameVi": "Sân bay quốc tế Tân Sơn Nhất (SGN)",
+      "addressVi": "Trường Sơn, Tân Bình, TP. Hồ Chí Minh",
+      "mapQuery": "Sân bay quốc tế Tân Sơn Nhất (SGN) Trường Sơn, Tân Bình, TP. Hồ Chí Minh"
     },
     {
       "id": "pqc",
@@ -603,7 +617,10 @@
       "geo": {
         "lat": 10.1698,
         "lng": 103.9931
-      }
+      },
+      "nameVi": "Sân bay quốc tế Phú Quốc (PQC)",
+      "addressVi": "Dương Tơ, TP. Phú Quốc",
+      "mapQuery": "Sân bay quốc tế Phú Quốc (PQC) Dương Tơ, TP. Phú Quốc"
     },
     {
       "id": "amarou",
@@ -616,7 +633,12 @@
       },
       "howTo": "第一郡核心位置酒店，到统一宫/中央邮局步行可达；入住后放行李轻装开逛",
       "cost": "房费已含",
-      "rainPlan": "—"
+      "rainPlan": "—",
+      "nameVi": "AMAROU Saigon",
+      "addressVi": "Quận 1, TP. Hồ Chí Minh",
+      "mapQuery": "AMAROU Saigon Quận 1, TP. Hồ Chí Minh",
+      "detailUrl": "https://hotels.ctrip.com/hotels/list?searchkey=AMAROU%20Saigon%20%E8%83%A1%E5%BF%97%E6%98%8E",
+      "note": "新开精品酒店，官网amrousaigon.com仅\"即将开业\"页，地址以你预订确认单为准"
     },
     {
       "id": "zao",
@@ -629,7 +651,11 @@
       },
       "howTo": "日落小镇内酒店，傍晚出门就是Kiss Bridge灯光秀，天台适合拍日落",
       "cost": "房费已含",
-      "rainPlan": "雨天大堂/房间看雨，晚上雨停再逛小镇"
+      "rainPlan": "雨天大堂/房间看雨，晚上雨停再逛小镇",
+      "nameVi": "ZAO Hotel Firework & Sea View",
+      "addressVi": "An Thới, TP. Phú Quốc",
+      "mapQuery": "ZAO Hotel Firework & Sea View An Thới, TP. Phú Quốc",
+      "detailUrl": "https://www.agoda.com/search?textToSearch=ZAO%20Hotel%20Firework%20%26%20Sea%20View"
     },
     {
       "id": "famiana",
@@ -642,7 +668,11 @@
       },
       "howTo": "长滩度假村：沙滩+泳池+SPA+海边日落，行程后半段纯躺平模式",
       "cost": "房费已含；SPA约¥200-400另计",
-      "rainPlan": "雨天躺酒店：SPA/泳池吧/阳台听雨"
+      "rainPlan": "雨天躺酒店：SPA/泳池吧/阳台听雨",
+      "nameVi": "Famiana Resort & Spa Phú Quốc",
+      "addressVi": "Cửa Lấp, Dương Tơ, TP. Phú Quốc",
+      "mapQuery": "Famiana Resort & Spa Phú Quốc Cửa Lấp, Dương Tơ, TP. Phú Quốc",
+      "detailUrl": "https://www.famianaresort.com/"
     },
     {
       "id": "reunify",
@@ -655,7 +685,11 @@
       },
       "howTo": "看总统府复原展厅→地下作战室→天台直升机坪，重点在\"1975年4月30日\"定格的那间办公室，约1.5小时",
       "cost": "门票约¥17（越南盾约6万）",
-      "rainPlan": "全室内+廊道，雨天照常"
+      "rainPlan": "全室内+廊道，雨天照常",
+      "nameVi": "Dinh Độc Lập (统一宫)",
+      "addressVi": "135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1, TP. HCM",
+      "mapQuery": "Dinh Độc Lập (统一宫) 135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1, TP. HCM",
+      "hours": "8:00-15:30"
     },
     {
       "id": "war",
@@ -668,7 +702,11 @@
       },
       "howTo": "三层历史影像与实物展，战地记者照片馆最震撼，内容偏沉重可自行取舍，约1小时",
       "cost": "门票约¥10",
-      "rainPlan": "全室内，雨天首选"
+      "rainPlan": "全室内，雨天首选",
+      "nameVi": "Bảo tàng Chứng tích Chiến tranh",
+      "addressVi": "28 Võ Văn Tần, Phường 6, Quận 3, TP. HCM",
+      "mapQuery": "Bảo tàng Chứng tích Chiến tranh 28 Võ Văn Tần, Phường 6, Quận 3, TP. HCM",
+      "hours": "7:30-17:30"
     },
     {
       "id": "post",
@@ -681,7 +719,11 @@
       },
       "howTo": "打卡法式穹顶大厅，两侧电话亭拍复古照，柜台上可买明信片+邮票现场寄（约1-2周到国内），约40分钟",
       "cost": "免费；明信片+邮票约¥15/张",
-      "rainPlan": "全室内"
+      "rainPlan": "全室内",
+      "nameVi": "Bưu điện Trung tâm Sài Gòn",
+      "addressVi": "2 Công xã Paris, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Bưu điện Trung tâm Sài Gòn 2 Công xã Paris, Bến Nghé, Quận 1, TP. HCM",
+      "hours": "约7:00-19:00"
     },
     {
       "id": "cathedral",
@@ -694,7 +736,11 @@
       },
       "howTo": "红砖双塔哥特立面，正面广场是最佳机位，常有围挡修缮（外观打卡即可，约20分钟）",
       "cost": "免费（仅外观，不开放入内）",
-      "rainPlan": "下雨拍两张就走，隔壁就是中央邮局和书街"
+      "rainPlan": "下雨拍两张就走，隔壁就是中央邮局和书街",
+      "nameVi": "Nhà thờ Đức Bà Sài Gòn",
+      "addressVi": "1 Công xã Paris, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Nhà thờ Đức Bà Sài Gòn 1 Công xã Paris, Bến Nghé, Quận 1, TP. HCM",
+      "note": "外观修缮中（预计到2027），看外观即可"
     },
     {
       "id": "bookstreet",
@@ -707,7 +753,11 @@
       },
       "howTo": "越南语书店+咖啡一条街，买本越南语绘本当纪念品很出片，逛完到街尾咖啡店坐坐，约45分钟",
       "cost": "免费逛；咖啡约¥10-20",
-      "rainPlan": "书街有雨棚，小雨照逛"
+      "rainPlan": "书街有雨棚，小雨照逛",
+      "nameVi": "Đường Sách TP.HCM",
+      "addressVi": "Nguyễn Văn Bình, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Đường Sách TP.HCM Nguyễn Văn Bình, Bến Nghé, Quận 1, TP. HCM",
+      "hours": "约8:00-22:00"
     },
     {
       "id": "coffee",
@@ -720,7 +770,11 @@
       },
       "howTo": "9层旧公寓改的咖啡馆楼，坐复古电梯上楼（电梯票约¥0.9），找一家临街窗位看阮惠街景，约1小时",
       "cost": "电梯约¥1，咖啡约¥15-25/杯",
-      "rainPlan": "全室内，雨天首选"
+      "rainPlan": "全室内，雨天首选",
+      "nameVi": "Cà phê Chung cư 42 Nguyễn Huệ",
+      "addressVi": "42 Nguyễn Huệ, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Cà phê Chung cư 42 Nguyễn Huệ 42 Nguyễn Huệ, Bến Nghé, Quận 1, TP. HCM",
+      "hours": "各店不一，约8:00-22:00"
     },
     {
       "id": "nguyenhue",
@@ -733,7 +787,10 @@
       },
       "howTo": "1公里步行街，下午4点后热闹，法式建筑群夜景+喷泉+街头表演，傍晚来最出片，约1.5小时",
       "cost": "免费",
-      "rainPlan": "雨天改逛两侧购物中心（Vincom等）"
+      "rainPlan": "雨天改逛两侧购物中心（Vincom等）",
+      "nameVi": "Phố đi bộ Nguyễn Huệ",
+      "addressVi": "Nguyễn Huệ, Quận 1, TP. HCM",
+      "mapQuery": "Phố đi bộ Nguyễn Huệ Nguyễn Huệ, Quận 1, TP. HCM"
     },
     {
       "id": "benthanh",
@@ -746,7 +803,11 @@
       },
       "howTo": "伴手礼一站买齐：咖啡豆、Phin滤杯、腰果、漆器、香料；砍价从5折起；中央小吃档口可吃午餐，约1.5小时",
       "cost": "伴手礼预算约¥50-150/人，现金优先",
-      "rainPlan": "室内市场，雨天照常"
+      "rainPlan": "室内市场，雨天照常",
+      "nameVi": "Chợ Bến Thành",
+      "addressVi": "Lê Lợi, Bến Thành, Quận 1, TP. HCM",
+      "mapQuery": "Chợ Bến Thành Lê Lợi, Bến Thành, Quận 1, TP. HCM",
+      "hours": "摊位约6:00-19:00，周边夜市约23:00收"
     },
     {
       "id": "saigonsquare",
@@ -759,7 +820,11 @@
       },
       "howTo": "外贸尾单市场（仿大牌衣服鞋包），砍价3折起、现金为主，第一天只逛不买、最后一天再下手，约2小时",
       "cost": "按需，人均预算约¥100-300",
-      "rainPlan": "室内"
+      "rainPlan": "室内",
+      "nameVi": "Saigon Square",
+      "addressVi": "77-89 Nam Kỳ Khởi Nghĩa, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Saigon Square 77-89 Nam Kỳ Khởi Nghĩa, Bến Nghé, Quận 1, TP. HCM",
+      "hours": "9:00-22:00"
     },
     {
       "id": "tontatthiep",
@@ -772,7 +837,10 @@
       },
       "howTo": "越南本地设计师/街头品牌集中地，层层逛+试穿，风格偏都市机能，约1.5-2小时",
       "cost": "单品约¥100-400",
-      "rainPlan": "室内"
+      "rainPlan": "室内",
+      "nameVi": "42 Tôn Thất Thiệp",
+      "addressVi": "42 Tôn Thất Thiệp, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "42 Tôn Thất Thiệp 42 Tôn Thất Thiệp, Bến Nghé, Quận 1, TP. HCM"
     },
     {
       "id": "workshop",
@@ -785,7 +853,11 @@
       },
       "howTo": "精品咖啡老牌（27 Ngô Đức Kế 老楼3楼，8:00-22:00）；有简餐可当午餐：招牌班尼迪克蛋（₫175k）、汉堡/沙拉/炖饭、提拉米苏；盐咖啡（₫80k）是招牌",
       "cost": "咖啡约¥15-25；简餐约¥30-60/份（2024-2026 实测）",
-      "rainPlan": "全室内"
+      "rainPlan": "全室内",
+      "nameVi": "The Workshop Coffee",
+      "addressVi": "27 Ngô Đức Kế, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "The Workshop Coffee 27 Ngô Đức Kế, Bến Nghé, Quận 1, TP. HCM",
+      "hours": "8:00-22:00"
     },
     {
       "id": "sunset",
@@ -798,7 +870,10 @@
       },
       "howTo": "地中海风彩色小镇，主街+钟楼+海景平台，傍晚日落和入夜灯光是两个最佳时段，约2-3小时",
       "cost": "免费逛；餐饮另计",
-      "rainPlan": "雨大看室内演出/咖啡馆，雨停再出来"
+      "rainPlan": "雨大看室内演出/咖啡馆，雨停再出来",
+      "nameVi": "Sunset Town Phú Quốc",
+      "addressVi": "An Thới, TP. Phú Quốc",
+      "mapQuery": "Sunset Town Phú Quốc An Thới, TP. Phú Quốc"
     },
     {
       "id": "kissbridge",
@@ -811,7 +886,12 @@
       },
       "howTo": "网红\"亲亲桥\"，每晚有免费灯光烟花秀（观景区免费），登桥走玻璃步道需购票，约1小时",
       "cost": "免费观景区；登桥约¥100",
-      "rainPlan": "雨天烟花可能取消，改室内"
+      "rainPlan": "雨天烟花可能取消，改室内",
+      "nameVi": "Cầu Hôn (Kiss Bridge)",
+      "addressVi": "Sunset Town, An Thới, TP. Phú Quốc",
+      "mapQuery": "Cầu Hôn (Kiss Bridge) Sunset Town, An Thới, TP. Phú Quốc",
+      "bookingUrl": "https://kissofthesea.com/",
+      "note": "灯光秀/烟花以当天场次为准，官网可查票"
     },
     {
       "id": "anthoi",
@@ -824,7 +904,10 @@
       },
       "howTo": "出海跳岛码头：Mong Tay白沙滩+Gam Ghi浮潜+May Rut岛，跟团或包船，看当天海况定，约6小时",
       "cost": "跳岛一日团约¥150-250/人",
-      "rainPlan": "大风浪停航→改躺酒店/SPA/夜市（当天上午用Windy看海况）"
+      "rainPlan": "大风浪停航→改躺酒店/SPA/夜市（当天上午用Windy看海况）",
+      "nameVi": "Cảng An Thới",
+      "addressVi": "An Thới, TP. Phú Quốc",
+      "mapQuery": "Cảng An Thới An Thới, TP. Phú Quốc"
     },
     {
       "id": "honthom",
@@ -837,7 +920,12 @@
       },
       "howTo": "世界最长跨海缆车（约8公里）+Aquatopia水上乐园，建议上午上岛下午回，约半天",
       "cost": "缆车+乐园约¥170-200",
-      "rainPlan": "雷雨天乐园可能关闭→改日落小镇或SPA"
+      "rainPlan": "雷雨天乐园可能关闭→改日落小镇或SPA",
+      "nameVi": "Cáp treo Hòn Thơm (Sun World)",
+      "addressVi": "Sunset Town, An Thới, TP. Phú Quốc",
+      "mapQuery": "Cáp treo Hòn Thơm (Sun World) Sunset Town, An Thới, TP. Phú Quốc",
+      "bookingUrl": "https://www.klook.com/activity/20750",
+      "ticket": "缆车+水上乐园联票约¥170-200，Klook可提前买"
     },
     {
       "id": "hamninh",
@@ -850,7 +938,10 @@
       },
       "howTo": "海上浮排餐厅吃现捞海鲜（Bé Ghẹ等），看渔港日落，约2小时",
       "cost": "海鲜人均约¥80-150",
-      "rainPlan": "浮排是带棚屋，小雨可行；大雨改酒店餐厅"
+      "rainPlan": "浮排是带棚屋，小雨可行；大雨改酒店餐厅",
+      "nameVi": "Làng chài Hàm Ninh",
+      "addressVi": "Hàm Ninh, TP. Phú Quốc",
+      "mapQuery": "Làng chài Hàm Ninh Hàm Ninh, TP. Phú Quốc"
     },
     {
       "id": "miumiu",
@@ -859,7 +950,12 @@
       "address": "04 Chu Manh Trinh, Bến Nghé, Quận 1",
       "howTo": "红眼后补觉备选之一：90分钟越式全身按摩（₫700k起，约¥200），闭眼睡一觉；店里安静、有空调，按摩完满血复活",
       "cost": "90分钟约¥200/人；30分钟肩颈约¥85/人（官方价目，2024）",
-      "rainPlan": "全室内，雨天照常（本计划里的固定节目）"
+      "rainPlan": "全室内，雨天照常（本计划里的固定节目）",
+      "nameVi": "Miu Miu Spa 1",
+      "addressVi": "4 Chử Mạnh Trinh, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Miu Miu Spa 1 4 Chử Mạnh Trinh, Bến Nghé, Quận 1, TP. HCM",
+      "bookingUrl": "https://miumiuspa.com/booking",
+      "hours": "约9:30-23:00"
     },
     {
       "id": "anan",
@@ -868,7 +964,12 @@
       "address": "89 Tôn Thất Đạm, Quận 1（滨城市场旁）",
       "howTo": "胡志明唯一米其林一星越南菜（2023-2025蝉联，主厨 Peter Cuong Franklin）；⚠️只营业晚餐 17:00-23:00，周一休；Tasting 需提前官网预订（5:30pm/8:30pm 两场）",
       "cost": "晚餐单点人均约¥150-300；Tasting US$115/人起（官网价，2026）",
-      "rainPlan": "室内餐厅，雨天照常"
+      "rainPlan": "室内餐厅，雨天照常",
+      "nameVi": "Anan Saigon",
+      "addressVi": "89 Tôn Thất Đạm, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Anan Saigon 89 Tôn Thất Đạm, Bến Nghé, Quận 1, TP. HCM",
+      "bookingUrl": "https://anansaigon.com/",
+      "hours": "17:00-23:00（周一休）"
     },
     {
       "id": "operahouse",
@@ -877,7 +978,10 @@
       "address": "07 Lam Sơn Square, Quận 1",
       "howTo": "City Sightseeing 红色双层巴士在此上车（红色售票亭在歌剧院侧面）；夜游17:30-21:00每30分钟一班，45分钟一圈；17:30班次正好看日落+华灯初上",
       "cost": "单次夜游约¥35-60/人；24小时通票约¥100-150/人（2026平台价）",
-      "rainPlan": "巴士有顶棚，小雨照开；暴雨改咖啡馆躲雨"
+      "rainPlan": "巴士有顶棚，小雨照开；暴雨改咖啡馆躲雨",
+      "nameVi": "Nhà hát Thành phố HCM",
+      "addressVi": "7 Công trường Lam Sơn, Bến Nghé, Quận 1, TP. HCM",
+      "mapQuery": "Nhà hát Thành phố HCM 7 Công trường Lam Sơn, Bến Nghé, Quận 1, TP. HCM"
     },
     {
       "id": "aodaishop",
@@ -886,7 +990,11 @@
       "address": "新定区 Dinh Cong Trang 街一带（如 Thuy Loan, 325 Hai Bà Trưng）",
       "howTo": "试穿选款20-30分钟（女款+男款，含斗笠/扇子配件），然后穿着去中央邮局/书街/红教堂拍纪念照（景点都在步行圈，2小时够拍）",
       "cost": "纯租借约¥70-180/人（₫200k-500k，2-8小时当日还）；含摄影师套餐¥570起",
-      "rainPlan": "10月午后多雷阵雨，尽量上午穿拍；大雨就回店还衣改逛室内"
+      "rainPlan": "10月午后多雷阵雨，尽量上午穿拍；大雨就回店还衣改逛室内",
+      "nameVi": "Áo Dài Ơi (Ao Dai Oi)",
+      "addressVi": "63 Đinh Công Tráng, Tân Định, Quận 1, TP. HCM",
+      "mapQuery": "Áo Dài Ơi (Ao Dai Oi) 63 Đinh Công Tráng, Tân Định, Quận 1, TP. HCM",
+      "detailUrl": "https://cn.tripadvisor.com/Attraction_Review-g293925-d17464318-Reviews-Ao_Dai_Oi"
     },
     {
       "id": "duongdong",
@@ -895,7 +1003,11 @@
       "address": "Đường Bạch Đằng, Dương Đông, Phú Quốc",
       "howTo": "富国岛最大夜市：海鲜烧烤大排档+珍珠/伴手礼摊位，边吃边逛2小时；离 Famiana 车程约20分钟",
       "cost": "人均¥50-150（海鲜按斤称）",
-      "rainPlan": "半露天，小雨照常；暴雨改酒店餐厅"
+      "rainPlan": "半露天，小雨照常；暴雨改酒店餐厅",
+      "nameVi": "Chợ đêm Dinh Cậu",
+      "addressVi": "Dương Đông, TP. Phú Quốc",
+      "mapQuery": "Chợ đêm Dinh Cậu Dương Đông, TP. Phú Quốc",
+      "hours": "约17:00-23:00"
     },
     {
       "id": "buncha145",
@@ -904,7 +1016,49 @@
       "address": "145 Bùi Viện, Phạm Ngũ Lão, Quận 1",
       "howTo": "炭烤猪肉米线（奥巴马访越同款），胡志明最知名 Bún Chả；米其林 Bib Gourmand 入选；午餐正合适",
       "cost": "人均约¥30-60（₫100k-200k）",
-      "rainPlan": "临街座位，小雨有棚；大雨改室内店"
+      "rainPlan": "临街座位，小雨有棚；大雨改室内店",
+      "nameVi": "Bún Chả 145 Bùi Viện",
+      "addressVi": "145 Bùi Viện, Phạm Ngũ Lão, Quận 1, TP. HCM",
+      "mapQuery": "Bún Chả 145 Bùi Viện 145 Bùi Viện, Phạm Ngũ Lão, Quận 1, TP. HCM",
+      "hours": "约10:30-22:00"
+    },
+    {
+      "id": "phohoa",
+      "name": "Phở Hòa Pasteur（1968老字号·米其林）",
+      "nameVi": "Phở Hòa Pasteur",
+      "addressVi": "260C Pasteur, Phường 8, Quận 3, TP. HCM",
+      "hours": "6:00-22:30",
+      "mapQuery": "Phở Hòa Pasteur 260C Pasteur, Phường 8, Quận 3, TP. HCM"
+    },
+    {
+      "id": "oanhcua",
+      "name": "OANH CUA 海鲜（热门排队店）",
+      "nameVi": "OANH CUA",
+      "addressVi": "214/1 Nguyễn Trãi, Nguyễn Cư Trinh, Quận 1, TP. HCM",
+      "mapQuery": "OANH CUA 214/1 Nguyễn Trãi, Nguyễn Cư Trinh, Quận 1, TP. HCM"
+    },
+    {
+      "id": "bahuynh",
+      "name": "Bánh Mì Bà Huynh",
+      "nameVi": "Bánh Mì Bà Huynh",
+      "addressVi": "197A Nguyễn Trãi, Quận 1, TP. HCM",
+      "mapQuery": "Bánh Mì Bà Huynh 197A Nguyễn Trãi, Quận 1, TP. HCM"
+    },
+    {
+      "id": "bepmein",
+      "name": "Bếp Mẹ Ỉn（米其林 Bib Gourmand）",
+      "nameVi": "Bếp Mẹ Ỉn",
+      "addressVi": "136/9 Lê Thánh Tôn, Bến Thành, Quận 1, TP. HCM",
+      "detailUrl": "https://bep.mein.vn/",
+      "mapQuery": "Bếp Mẹ Ỉn 136/9 Lê Thánh Tôn, Bến Thành, Quận 1, TP. HCM"
+    },
+    {
+      "id": "honghoa",
+      "name": "Bánh Mì Hồng Hoa",
+      "nameVi": "Bánh Mì Hồng Hoa",
+      "addressVi": "52-54 Nguyễn Văn Tráng, Bến Thành, Quận 1, TP. HCM",
+      "detailUrl": "https://banhmihonghoa.com/",
+      "mapQuery": "Bánh Mì Hồng Hoa 52-54 Nguyễn Văn Tráng, Bến Thành, Quận 1, TP. HCM"
     }
   ],
   "restaurants": [
