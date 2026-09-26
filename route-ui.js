@@ -121,18 +121,34 @@ function renderRouteSteps(dayNumber) {
   if (!dayNumber) return "";
   const day = state.data.days.find((d) => d.day === dayNumber);
   if (!day || !day.schedule?.length) return "";
+  const typeClass = {
+    flight: "tl-flight", transfer: "tl-transfer", walk: "tl-walk", drive: "tl-transfer",
+    train: "tl-transfer", rail: "tl-transfer", ferry: "tl-transfer", boat: "tl-transfer",
+    "cable-car": "tl-transfer", return: "tl-transfer", hike: "tl-walk",
+    attraction: "tl-walk", restaurant: "tl-food", "check-in": "tl-hotel", "check-out": "tl-hotel",
+    rest: "tl-rest", note: "tl-note"
+  };
+  const typeIcon = {
+    flight: "✈️", transfer: "🚗", walk: "🚶", drive: "🚗", train: "🚆", rail: "🚆",
+    ferry: "⛴️", boat: "⛴️", "cable-car": "🚡", return: "↩️", hike: "🚶",
+    attraction: "🏛️", restaurant: "🍜", "check-in": "🏨", "check-out": "🧳", rest: "😴", note: "📝"
+  };
   const steps = day.schedule.map((s) => {
     const place = s.placeId ? (state.data.places || []).find((p) => p.id === s.placeId) : null;
-    const tipParts = [];
-    if (place?.howTo) tipParts.push(`<span class="pt-label">💡 怎么玩</span><span>${escapeHtml(place.howTo)}</span>`);
-    if (place?.cost) tipParts.push(`<span class="pt-label">💰 花费</span><span>${escapeHtml(place.cost)}</span>`);
-    if (place?.rainPlan) tipParts.push(`<span class="pt-label">🌧 雨天PlanB</span><span>${escapeHtml(place.rainPlan)}</span>`);
-    const tipBlock = tipParts.length ? `<div class="place-tip">${tipParts.join("")}</div>` : "";
-    return `<li><span class="step-time">${escapeHtml(s.time)}</span><span class="step-type">${stepTypeNames[s.type] || ""}</span><span class="step-text">${escapeHtml(s.text)}</span>${tipBlock}</li>`;
+    const tips = [];
+    if (place?.howTo) tips.push(`<div class="tip-row tip-how"><span class="tip-ico">💡</span><span class="tip-label">怎么玩</span><span class="tip-body">${escapeHtml(place.howTo)}</span></div>`);
+    if (place?.cost) tips.push(`<div class="tip-row tip-cost"><span class="tip-ico">💰</span><span class="tip-label">花费</span><span class="tip-body">${escapeHtml(place.cost)}</span></div>`);
+    if (place?.rainPlan) tips.push(`<div class="tip-row tip-rain"><span class="tip-ico">🌧️</span><span class="tip-label">雨天</span><span class="tip-body">${escapeHtml(place.rainPlan)}</span></div>`);
+    const placeName = place?.name ? `<div class="tl-place">📍 ${escapeHtml(place.name)}</div>` : "";
+    return `<li class="tl-item ${typeClass[s.type] || "tl-note"}">
+      <div class="tl-time">${escapeHtml(s.time)}</div>
+      <div class="tl-rail"><span class="tl-dot">${typeIcon[s.type] || "📝"}</span></div>
+      <div class="tl-card"><div class="tl-text">${escapeHtml(s.text)}</div>${placeName}${tips.join("")}</div>
+    </li>`;
   }).join("");
   return `<div class="route-steps">
-    <h3>${day.date.slice(5).replace("-", "/")} · ${escapeHtml(day.title)} — 路线步骤</h3>
-    <ol>${steps}</ol>
+    <h3 class="route-steps-title">${day.date.slice(5).replace("-", "/")} · ${escapeHtml(day.title)}</h3>
+    <ol class="timeline">${steps}</ol>
   </div>`;
 }
 

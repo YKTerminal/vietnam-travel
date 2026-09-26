@@ -625,3 +625,42 @@ button:focus-visible,a:focus-visible {outline:2px solid var(--lake);outline-offs
   }
   .leaflet-bar { border-radius: 10px !important; }
 }
+
+/* ===== 2026-09-26 时间轴式行程步骤 ===== */
+.route-steps-title { font-size: 17px; font-weight: 800; color: #092653; margin: 4px 0 14px; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+.route-steps .tl-item { position: relative; display: grid !important; grid-template-columns: 52px 30px 1fr; gap: 8px; padding: 0 0 16px; border-bottom: none !important; align-items: stretch; font-size: 14px; }
+.route-steps .tl-item::before { content: ""; position: absolute; left: calc(52px + 8px + 15px - 1px); top: 8px; bottom: -6px; width: 2px; background: #e3e8e3; }
+.route-steps .tl-item:last-child::before { display: none; }
+.tl-time { font-weight: 700; font-size: 12.5px; color: #1e56c4; text-align: right; padding-top: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tl-rail { display: flex; justify-content: center; }
+.tl-dot {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 13px; background: #fff; border: 2px solid #9aa3ad;
+  position: relative; z-index: 1; box-sizing: border-box;
+}
+.tl-flight .tl-dot { border-color: #1e56c4; background: #e8effc; }
+.tl-transfer .tl-dot { border-color: #64748b; background: #eef1f4; }
+.tl-walk .tl-dot { border-color: #0f5c33; background: #e6f2ea; }
+.tl-food .tl-dot { border-color: #c2410c; background: #fdeee4; }
+.tl-hotel .tl-dot { border-color: #7c3aed; background: #f0eafc; }
+.tl-rest .tl-dot { border-color: #0b6e75; background: #e3f3f4; }
+.tl-note .tl-dot { border-color: #9aa3ad; background: #f2f4f5; }
+.tl-card { background: #fff; border: 1px solid #e6eae6; border-radius: 12px; padding: 10px 12px; }
+.tl-text { font-size: 14px; line-height: 1.65; color: #24292e; }
+.tl-place { font-size: 12px; font-weight: 600; color: #7a8680; margin-top: 5px; }
+.tip-row { display: flex; gap: 6px; align-items: baseline; margin-top: 8px; padding: 7px 9px; border-radius: 8px; font-size: 12.5px; line-height: 1.55; }
+.tip-ico { flex: none; }
+.tip-label { flex: none; font-weight: 700; }
+.tip-body { flex: 1; }
+.tip-how { background: #f2f8f3; color: #2c4d3a; } .tip-how .tip-label { color: #0f5c33; }
+.tip-cost { background: #fdf7ec; color: #6b4e1a; } .tip-cost .tip-label { color: #a16207; }
+.tip-rain { background: #f0f5fb; color: #33506e; } .tip-rain .tip-label { color: #1e56c4; }
+
+@media (max-width: 699px) {
+  .route-steps .tl-item { grid-template-columns: 48px 28px 1fr; gap: 7px; }
+  .route-steps .tl-item::before { left: calc(48px + 7px + 14px - 1px); }
+  .tl-text { font-size: 14.5px; }
+  .tl-place { font-size: 12.5px; }
+  .tip-row { font-size: 13px; }
+}
