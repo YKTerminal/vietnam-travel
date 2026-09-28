@@ -935,28 +935,21 @@
   }
 
 
-  function summaryQuickRows() {
-    const data = window.TRAVEL_PLAN_DATA;
-    const rows = [];
-    (data?.flights || []).forEach((f, i) => {
-      rows.push({
-        kind: "flight",
-        date: f.departure?.date || "",
-        name: `✈️ 机票 ${f.flightNumber || "第" + (i + 1) + "程"} · ${f.departure?.city || ""} → ${f.arrival?.city || ""}`,
-        category: "交通"
-      });
-    });
-    (data?.accommodations || []).forEach((a) => {
-      rows.push({
-        kind: "stay",
-        date: a.checkIn || "",
-        name: `🏨 酒店 ${a.name || ""}`,
-        category: "住宿"
-      });
-    });
-    return rows;
+  function summaryFlights() {
+    return (window.TRAVEL_PLAN_DATA?.flights || []).map((f) => ({
+      no: f.flightNumber || "",
+      route: (f.departure?.city || "") + " → " + (f.arrival?.city || ""),
+      date: f.departure?.date || ""
+    }));
   }
 
+  function summaryHotels() {
+    return (window.TRAVEL_PLAN_DATA?.accommodations || []).map((a) => ({
+      name: a.name || "",
+      checkIn: a.checkIn || "",
+      checkOut: a.checkOut || ""
+    }));
+  }
   function renderSummaryPage() {
     const stats = calculateStats();
     const baseCurrency = ledgerData.settings.baseCurrency;
@@ -1005,19 +998,42 @@
       </div>`;
     }).join("");
 
-    const quick = summaryQuickRows();
-    const quickHtml = travelers.length
-      ? quick.map((r, i) => `
-      <div class="ledger-quick-row" data-summary-kind="${escapeHtml(r.kind)}">
-        <div class="ledger-quick-name"><span>${escapeHtml(r.name)}</span><small>${escapeHtml(r.date)} · ${escapeHtml(r.category)}</small></div>
-        <div class="ledger-quick-ctl">
-          <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="金额¥" data-summary-amount aria-label="${escapeHtml(r.name)}金额">
-          <select data-summary-payer aria-label="买单人">${travelers.map((t, ti) => `<option value="${escapeHtml(t.id)}"${ti === 0 ? " selected" : ""}>${escapeHtml(t.name)}</option>`).join("")}</select>
-          <button type="button" data-ledger-action="summary-book" data-summary-row="${i}">入账</button>
-        </div>
-      </div>`).join("")
-      : `<p class="ledger-empty">先在"记账"页添加 4 位同行人，再回来速录机酒。</p>`;
+    const flights = summaryFlights();
+    const hotels = summaryHotels();
+    const flightRows = flights.map((f, fi) => {
+      const rows = travelers.map((t) => `
+        <div class="ledger-quick-row ledger-flight-row">
+          <div class="ledger-quick-name"><span>${escapeHtml(t.name)}</span><small>${escapeHtml(f.no)} · ${escapeHtml(f.date)}</small></div>
+          <div class="ledger-quick-ctl">
+            <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="票价¥" data-summary-amount aria-label="${escapeHtml(t.name)}机票金额">
+            <button type="button" data-ledger-action="summary-book" data-summary-kind="flight" data-summary-flight="${fi}" data-summary-traveler="${escapeHtml(t.id)}">入账</button>
+          </div>
+        </div>`).join("");
+      return `<div class="ledger-quick-group"><div class="ledger-quick-group-title">✈️ 机票 ${escapeHtml(f.no)} · ${escapeHtml(f.route)} · ${escapeHtml(f.date)}</div>${rows}</div>`;
+    }).join("");
 
+    const hotelRows = hotels.map((h, hi) => {
+      const rooms = [0, 1].map((room) => {
+        const payer = travelers[room * 2];
+        const mate = travelers[room * 2 + 1] || travelers[(room * 2 + 1) % travelers.length] || travelers[0];
+        const payerOptions = travelers.map((t) => `<option value="${escapeHtml(t.id)}"${t.id === payer?.id ? " selected" : ""}>${escapeHtml(t.name)}订</option>`).join("");
+        const mateOptions = travelers.filter((t) => t.id !== payer?.id).map((t) => `<option value="${escapeHtml(t.id)}"${t.id === mate?.id ? " selected" : ""}>${escapeHtml(t.name)}</option>`).join("");
+        return `<div class="ledger-quick-row">
+          <div class="ledger-quick-name"><span>房 ${room + 1}</span><small>${escapeHtml(h.name)} · ${escapeHtml(h.checkIn)}入住</small></div>
+          <div class="ledger-quick-ctl">
+            <select data-summary-payer aria-label="订房人">${payerOptions}</select>
+            <select data-summary-mate aria-label="同房人">${mateOptions}</select>
+            <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="房费¥" data-summary-amount aria-label="房费金额">
+            <button type="button" data-ledger-action="summary-book" data-summary-kind="stay" data-summary-hotel="${hi}" data-summary-room="${room + 1}">入账</button>
+          </div>
+        </div>`;
+      }).join("");
+      return `<div class="ledger-quick-group"><div class="ledger-quick-group-title">🏨 ${escapeHtml(h.name)}（${escapeHtml(h.checkIn)} ~ ${escapeHtml(h.checkOut)}）</div>${rooms}</div>`;
+    }).join("");
+
+    const quickHtml = travelers.length
+      ? `<div class="ledger-quick-head">✈️ 机票各买各的，记在买的人头上不分摊　·　🏨 酒店 2 人一间，同房 2 人分摊房费</div>${flightRows}${hotelRows}`
+      : `<p class="ledger-empty">先在"记账"页添加 4 位同行人，再回来速录机酒。</p>`;
     return `
       <section class="ledger-tab-panel ledger-summary-panel" data-ledger-panel="summary" role="tabpanel" aria-labelledby="ledger-summary-tab" ${activeTab === "summary" ? "" : "hidden"}>
         <section class="ledger-stats-overview" aria-labelledby="ledger-summary-title">
@@ -1031,7 +1047,7 @@
             <div><p class="ledger-section-kicker">机酒大头</p><h2>机票酒店速录（已购）</h2></div>
           </div>
           ${quickHtml}
-          <p class="ledger-hint">✈️🏨 按你们已确认的 3 程机票 + 4 家酒店预置：填金额、选买单人、点"入账"即计入统计，默认 4 人平分。重复点会提示已入过账。</p>
+          <p class="ledger-hint">✈️ 机票各买各的：在对应人名下填票价入账，只记在买的人头上、不参与团队分摊。🏨 酒店 2 人一间：每间房选"订房人 + 同房人"，房费由订房人垫付、同房 2 人平分。重复入账会提示。</p>
         </section>
 
         <section class="ledger-summary-section">
@@ -1065,37 +1081,47 @@
   document.addEventListener("click", (event) => {
     const btn = event.target.closest('[data-ledger-action="summary-book"]');
     if (!btn || !ledgerData) return;
+    const kind = btn.dataset.summaryKind;
     const rowEl = btn.closest(".ledger-quick-row");
     const amountInput = rowEl?.querySelector("[data-summary-amount]");
-    const payerSel = rowEl?.querySelector("[data-summary-payer]");
-    const rows = summaryQuickRows();
-    const row = rows[Number(btn.dataset.summaryRow || 0)];
-    if (!row || !amountInput || !payerSel) return;
-    const cents = toCents(amountInput.value);
-    if (!cents || cents <= 0) { setNotice("先填这一项的金额（¥）再入账。"); amountInput.focus(); return; }
-    const payerId = payerSel.value;
-    if (!travelerById(payerId)) { setNotice("请选择买单人。"); return; }
-    const dup = ledgerData.bills.some((b) => b.note === row.name && String(b.orderedAt || "").slice(0, 10) === row.date);
-    if (dup) { setNotice("这一项已经入过账了。"); return; }
-    const now = new Date().toISOString();
+    const cents = toCents(amountInput?.value);
+    if (!cents || cents <= 0) { setNotice("先填金额（¥）再入账。"); amountInput?.focus(); return; }
     const baseCurrency = ledgerData.settings.baseCurrency;
-    mutateData((next) => {
-      next.bills.push({
-        id: makeId("bill"),
-        originalAmountCents: cents,
-        baseAmountCents: cents,
-        currency: baseCurrency,
-        category: row.category,
-        note: row.name,
-        orderedAt: row.date,
-        payerId,
-        participantIds: ledgerData.travelers.map((t) => t.id),
-        createdAt: now,
-        updatedAt: now
-      });
-    }, { reason: "bill-added", message: `已入账：${row.name} ${formatMoney(cents, baseCurrency)}` });
+    const now = new Date().toISOString();
+    if (kind === "flight") {
+      const fi = Number(btn.dataset.summaryFlight || 0);
+      const tid = btn.dataset.summaryTraveler;
+      const f = summaryFlights()[fi];
+      const t = travelerById(tid);
+      if (!f || !t) return;
+      const note = `✈️ 机票 ${f.no} · ${t.name}`;
+      if (ledgerData.bills.some((b) => b.note === note)) { setNotice("这张机票已经入过账了。"); return; }
+      mutateData((next) => next.bills.push({
+        id: makeId("bill"), originalAmountCents: cents, baseAmountCents: cents, currency: baseCurrency,
+        category: "交通", note, orderedAt: f.date, payerId: tid, participantIds: [tid],
+        createdAt: now, updatedAt: now
+      }), { reason: "bill-added", message: `已入账：${note} ${formatMoney(cents, baseCurrency)}` });
+      return;
+    }
+    if (kind === "stay") {
+      const hi = Number(btn.dataset.summaryHotel || 0);
+      const room = btn.dataset.summaryRoom;
+      const h = summaryHotels()[hi];
+      const payerId = rowEl?.querySelector("[data-summary-payer]")?.value;
+      const mateId = rowEl?.querySelector("[data-summary-mate]")?.value;
+      if (!h || !travelerById(payerId) || !travelerById(mateId)) { setNotice("请选好订房人和同房人。"); return; }
+      if (payerId === mateId) { setNotice("订房人和同房人不能是同一人。"); return; }
+      const pn = travelerById(payerId).name, mn = travelerById(mateId).name;
+      const note = `🏨 ${h.name} · 房${room}（${pn}+${mn}）`;
+      if (ledgerData.bills.some((b) => b.note === note)) { setNotice("这间房已经入过账了。"); return; }
+      mutateData((next) => next.bills.push({
+        id: makeId("bill"), originalAmountCents: cents, baseAmountCents: cents, currency: baseCurrency,
+        category: "住宿", note, orderedAt: h.checkIn, payerId, participantIds: [payerId, mateId],
+        createdAt: now, updatedAt: now
+      }), { reason: "bill-added", message: `已入账：${note} ${formatMoney(cents, baseCurrency)}` });
+      return;
+    }
   });
-
   function renderStatsPage() {
     const stats = calculateStats();
     const baseCurrency = ledgerData.settings.baseCurrency;

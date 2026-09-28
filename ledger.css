@@ -462,3 +462,11 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
   .ledger-cat-row { grid-template-columns: 64px 1fr 76px; }
   .ledger-quick-ctl input { width: 80px; }
 }
+
+/* 2026-09-28 速录改版：机票按人/酒店按房 */
+.ledger-quick-head { font-size: 12px; font-weight: 700; color: #556; margin: 4px 0 10px; }
+.ledger-quick-group { margin-bottom: 14px; }
+.ledger-quick-group-title { font-size: 12.5px; font-weight: 800; color: #1c3d2a; margin: 2px 0 8px; padding: 7px 10px; background: #eef4ee; border-radius: 9px; }
+.ledger-quick-row { padding: 8px 10px; margin-bottom: 6px; }
+.ledger-quick-ctl select { max-width: 104px; font-size: 12px; padding: 7px 4px; }
+.ledger-quick-ctl input { width: 78px; font-size: 13px; padding: 7px 8px; }
