@@ -1142,6 +1142,20 @@
       </section>`;
   }
   document.addEventListener("change", (event) => {
+    const payerSel = event.target.closest("[data-summary-payer]");
+    if (payerSel && ledgerData) {
+      const rowEl = payerSel.closest(".ledger-quick-row");
+      const mateSel = rowEl?.querySelector("[data-summary-mate]");
+      if (mateSel) {
+        const prevMate = mateSel.value;
+        const payerId = payerSel.value;
+        mateSel.innerHTML = ledgerData.travelers
+          .filter((t) => t.id !== payerId)
+          .map((t) => `<option value="${escapeHtml(t.id)}"${t.id === prevMate ? " selected" : ""}>${escapeHtml(t.name)}</option>`)
+          .join("");
+      }
+      return;
+    }
     const sel = event.target.closest("[data-split-mode]");
     if (!sel) return;
     try { localStorage.setItem("vn-split-mode-" + sel.dataset.splitMode, sel.value); } catch (e) {}
