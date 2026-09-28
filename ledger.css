@@ -470,3 +470,11 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
 .ledger-quick-row { padding: 8px 10px; margin-bottom: 6px; }
 .ledger-quick-ctl select { max-width: 104px; font-size: 12px; padding: 7px 4px; }
 .ledger-quick-ctl input { width: 78px; font-size: 13px; padding: 7px 8px; }
+
+/* 2026-09-28 分摊方式选择器 */
+.ledger-split-modes { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 12px; }
+.ledger-split-modes label { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #3a4d42; background: #eef4ee; border: 1px solid #d6e4d6; border-radius: 9px; padding: 6px 10px; }
+.ledger-split-modes select { font-size: 12.5px; font-weight: 600; padding: 4px 6px; border: 1px solid #c3d5c3; border-radius: 7px; background: #fff; color: #1c3d2a; }
+.ledger-chip-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 0; }
+.ledger-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #334; background: #f4f7f4; border: 1px solid #d7e0d7; border-radius: 999px; padding: 5px 9px; cursor: pointer; }
+.ledger-chip input { accent-color: #176b3a; }
