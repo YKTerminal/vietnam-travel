@@ -91,7 +91,7 @@
         "airportCode": "SGN",
         "city": "胡志明市",
         "date": "2026-10-02",
-        "time": "05:00",
+        "time": "04:50",
         "utcOffset": "+07:00",
         "terminal": "T2 国际到达"
       }
@@ -171,8 +171,16 @@
       "name": "Famiana Resort & Spa",
       "city": "富国岛长滩",
       "checkIn": "2026-10-06",
-      "checkOut": "2026-10-08",
+      "checkOut": "2026-10-07",
       "note": "躺平+SPA"
+    },
+    {
+      "id": "stay4",
+      "name": "WorldHotels Long Beach Resort Phu Quoc（世界酒店长滩度假村）",
+      "city": "富国岛长滩（中部）",
+      "checkIn": "2026-10-07",
+      "checkOut": "2026-10-08",
+      "note": "Cua Lap村Dương Tơ，5星，与Famiana同区长滩"
     }
   ],
   "days": [
@@ -192,9 +200,9 @@
           "placeId": "szx"
         },
         {
-          "time": "05:00",
+          "time": "04:50",
           "type": "flight",
-          "text": "抵达胡志明新山一机场（票面时间），红眼航班——今天以休息为先",
+          "text": "抵达胡志明新山一机场（票面04:50），红眼航班——今天以休息为先",
           "placeId": "sgn"
         },
         {
@@ -521,6 +529,12 @@
           "time": "21:00",
           "type": "rest",
           "text": "收拾行李（明天返程）"
+        },
+        {
+          "time": "17:00",
+          "type": "check-in",
+          "text": "换酒店：入住世界酒店长滩度假村（WorldHotels Long Beach，长滩中部，与Famiana同区，退房后Grab约10分钟）",
+          "placeId": "worldhotel"
         }
       ]
     },
@@ -543,14 +557,14 @@
           "id": "d7-s2",
           "time": "09:00",
           "type": "check-out",
-          "text": "Famiana 退房",
-          "placeId": "famiana"
+          "text": "世界酒店长滩度假村退房（行李寄存前台）",
+          "placeId": "worldhotel"
         },
         {
           "id": "d7-s3",
           "time": "10:00",
           "type": "transfer",
-          "text": "前往富国岛机场（Grab约40分钟，约¥60）",
+          "text": "前往富国岛机场（长滩中部出发Grab约25-30分钟，约¥50）",
           "placeId": "pqc"
         },
         {
@@ -635,10 +649,10 @@
       "cost": "房费已含",
       "rainPlan": "—",
       "nameVi": "AMAROU Saigon",
-      "addressVi": "Quận 1, TP. Hồ Chí Minh",
-      "mapQuery": "AMAROU Saigon Quận 1, TP. Hồ Chí Minh",
+      "addressVi": "20 Thi Sách, Đa Kao, Quận 1, TP. HCM",
+      "mapQuery": "AMAROU Saigon 20 Thi Sách Đa Kao Quận 1",
       "detailUrl": "https://hotels.ctrip.com/hotels/list?searchkey=AMAROU%20Saigon%20%E8%83%A1%E5%BF%97%E6%98%8E",
-      "note": "新开精品酒店，官网amrousaigon.com仅\"即将开业\"页，地址以你预订确认单为准"
+      "note": "地址以预订确认单为准"
     },
     {
       "id": "zao",
@@ -1059,6 +1073,14 @@
       "addressVi": "52-54 Nguyễn Văn Tráng, Bến Thành, Quận 1, TP. HCM",
       "detailUrl": "https://banhmihonghoa.com/",
       "mapQuery": "Bánh Mì Hồng Hoa 52-54 Nguyễn Văn Tráng, Bến Thành, Quận 1, TP. HCM"
+    },
+    {
+      "id": "worldhotel",
+      "name": "世界酒店长滩度假村（WorldHotels Long Beach）",
+      "nameVi": "WorldHotels Long Beach Resort Phu Quoc",
+      "addressVi": "Cửa Lấp, Dương Tơ, TP. Phú Quốc",
+      "mapQuery": "WorldHotels Long Beach Resort Phu Quoc Cửa Lấp Dương Tơ",
+      "detailUrl": "https://www.agoda.com/search?textToSearch=WorldHotels%20Long%20Beach%20Resort%20Phu%20Quoc"
     }
   ],
   "restaurants": [
