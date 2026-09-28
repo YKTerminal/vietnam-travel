@@ -148,6 +148,7 @@
   let currencyQuery = "";
   let notice = "";
   let billDraft = null;
+  let billCatFilter = "__all";
   let editingMemberId = null;
   let editingNoteBillId = null;
   let pendingNoteSave = null;
@@ -885,21 +886,15 @@
       return secondDate.localeCompare(firstDate);
     });
     const catMark = { "餐饮": "🍜", "交通": "🚕", "住宿": "🏨", "门票": "🎫", "购物": "🛍️", "其他": "📦" };
-    const groups = CATEGORIES
-      .map((c) => ({ c, list: bills.filter((b) => b.category === c) }))
-      .filter((g) => g.list.length)
-      .map((g) => {
-        const sub = g.list.reduce((s, b) => s + b.baseAmountCents, 0);
-        return `
-        <div class="ledger-bill-group">
-          <div class="ledger-bill-group-head">
-            <span>${catMark[g.c] || ""} ${escapeHtml(g.c)} · ${g.list.length} 笔</span>
-            <b>${escapeHtml(formatMoney(sub, baseCurrency))}</b>
-          </div>
-          <div class="ledger-bill-list">${g.list.map(renderBillRow).join("")}</div>
-        </div>`;
-      })
-      .join("");
+    const filtered = billCatFilter === "__all" ? bills : bills.filter((b) => b.category === billCatFilter);
+    const countOf = (c) => bills.filter((b) => b.category === c).length;
+    const tabBtn = (value, label, count) => `
+      <button type="button" class="ledger-cat-tab${billCatFilter === value ? " ledger-is-active" : ""}" data-ledger-action="filter-bill-cat" data-ledger-cat="${escapeAttribute(value)}">${label}${count ? ` <small>${count}</small>` : ""}</button>`;
+    const tabs = `
+      <div class="ledger-cat-tabs" role="tablist" aria-label="按类别筛选账单">
+        ${tabBtn("__all", "全部", bills.length)}
+        ${CATEGORIES.map((c) => tabBtn(c, `${catMark[c] || ""} ${escapeHtml(c)}`, countOf(c))).join("")}
+      </div>`;
     return `
       <section class="ledger-list-section" aria-labelledby="ledger-list-title">
         <div class="ledger-section-heading ledger-list-heading">
@@ -912,9 +907,12 @@
             <strong>${escapeHtml(formatMoney(totalCents, baseCurrency))}</strong>
           </div>
         </div>
-        ${bills.length
-          ? `<div class="ledger-bill-groups">${groups}</div>`
-          : `<div class="ledger-empty-state"><p>记下第一笔花费后，账单会按类别分组显示在这里。</p></div>`}
+        ${bills.length ? `
+          ${tabs}
+          ${filtered.length
+            ? `<div class="ledger-bill-list">${filtered.map(renderBillRow).join("")}</div>`
+            : `<div class="ledger-empty-state"><p>该类别还没有账单。</p></div>`}
+        ` : `<div class="ledger-empty-state"><p>记下第一笔花费后，账单会按类别筛选显示在这里。</p></div>`}
       </section>`;
   }
 
@@ -1817,6 +1815,9 @@
     if (action === "set-tab") {
       captureBillDraft();
       setActiveTab(button.dataset.ledgerTab);
+    } else if (action === "filter-bill-cat") {
+      billCatFilter = button.dataset.ledgerCat || "__all";
+      renderApp();
     } else if (action === "open-members") {
       captureBillDraft();
       showDialog("members");
