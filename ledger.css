@@ -478,3 +478,59 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
 .ledger-chip-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 0; }
 .ledger-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #334; background: #f4f7f4; border: 1px solid #d7e0d7; border-radius: 999px; padding: 5px 9px; cursor: pointer; }
 .ledger-chip input { accent-color: #176b3a; }
+
+/* 2026-09-28 统计页重构：账单明细分组 + 每日花销一览 */
+.ledger-bill-group { margin: 0 0 14px; }
+.ledger-bill-group-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: #f3f5fa; border-radius: 10px 10px 0 0;
+  font-size: 13px; font-weight: 700; color: #333;
+}
+.ledger-bill-group-head b { font-size: 13px; color: #1a1f36; }
+.ledger-bill-group .ledger-bill-row { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
+
+.ledger-person-list { display: flex; flex-direction: column; gap: 8px; }
+.ledger-person-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #f7f8fb; border-radius: 12px; padding: 10px 14px;
+}
+.ledger-person-row span { flex: 1; font-size: 14px; font-weight: 600; color: #1a1f36; }
+.ledger-person-row b { font-size: 15px; color: #0f766e; }
+
+.ledger-day-group {
+  background: #fff; border: 1px solid #e5e8f0; border-radius: 12px;
+  margin: 0 0 10px; overflow: hidden;
+}
+.ledger-day-group[open] { border-color: #c9d2e8; }
+.ledger-day-summary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; cursor: pointer; list-style: none; user-select: none;
+}
+.ledger-day-summary::-webkit-details-marker { display: none; }
+.ledger-day-summary::before {
+  content: "▸"; font-size: 14px; color: #8590a8; transition: transform .15s ease;
+}
+.ledger-day-group[open] > .ledger-day-summary::before { transform: rotate(90deg); }
+.ledger-day-date { font-size: 14px; font-weight: 700; color: #1a1f36; }
+.ledger-day-meta { font-size: 12px; color: #8590a8; flex: 1; }
+.ledger-day-total { font-size: 15px; color: #0f766e; }
+
+.ledger-day-detail { border-top: 1px dashed #e5e8f0; padding: 4px 14px 10px; }
+.ledger-day-cat { margin-top: 8px; }
+.ledger-day-cat-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12.5px; font-weight: 700; color: #556080; padding-bottom: 4px;
+}
+.ledger-day-cat-head b { color: #1a1f36; font-size: 12.5px; }
+.ledger-day-bills { list-style: none; margin: 0; padding: 0; }
+.ledger-day-bill {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 0; border-bottom: 1px solid #f0f2f8;
+}
+.ledger-day-bill:last-child { border-bottom: none; }
+.ledger-day-bill-top {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+}
+.ledger-day-bill-note { font-size: 13.5px; color: #1a1f36; }
+.ledger-day-bill-top b { font-size: 13.5px; color: #1a1f36; white-space: nowrap; }
+.ledger-day-bill-sub { font-size: 12px; color: #8590a8; }
