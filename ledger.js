@@ -650,7 +650,211 @@
         <span class="ledger-quick-tpls-label">快捷</span>
         ${QUICK_TEMPLATES.map((t) => `
           <button type="button" class="ledger-quick-tpl" data-ledger-action="apply-template" data-ledger-template="${escapeAttribute(t.id)}">${escapeHtml(t.label)}</button>`).join("")}
+        <button type="button" class="ledger-quick-tpl ledger-quick-tpl-parse" data-ledger-action="open-parse">📋 粘贴解析</button>
       </div>`;
+  }
+
+  // ===== 粘贴解析 =====
+  const PARSE_CN_NUM = { "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10, "十一": 11, "十二": 12 };
+  let parseDrafts = [];
+
+  function parsePad(n) { return String(n).padStart(2, "0"); }
+
+  function parseDateInfo(s) {
+    const m1 = s.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*[号日]/);
+    if (m1) return { y: new Date().getFullYear(), m: +m1[1], d: +m1[2] };
+    if (/今天/.test(s)) { const t = new Date(); return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() }; }
+    if (/明天/.test(s)) { const t = new Date(); t.setDate(t.getDate() + 1); return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() }; }
+    const m2 = s.match(/(\d{1,2})\s*[号日]/);
+    if (m2) {
+      const day = +m2[1];
+      const now = new Date();
+      let y = now.getFullYear();
+      let mo = now.getMonth() + 1;
+      const cand = new Date(y, mo - 1, day);
+      if (cand < new Date(y, now.getMonth(), now.getDate())) { mo += 1; if (mo > 12) { mo = 1; y += 1; } }
+      return { y, m: mo, d: day };
+    }
+    return null;
+  }
+
+  function parseTimes(s) {
+    const hits = [];
+    let m;
+    const re = /(\d{1,2})\s*[:：点]\s*(\d{1,2})/g;
+    while ((m = re.exec(s))) hits.push({ i: m.index, t: parsePad(+m[1]) + ":" + parsePad(+m[2]) });
+    const re2 = /(凌晨|清晨|早上|上午|中午|下午|傍晚|晚上|深夜)([一二两三四五六七八九十]{1,2})\s*点/g;
+    while ((m = re2.exec(s))) {
+      const base = { "凌晨": 0, "清晨": 6, "早上": 8, "上午": 10, "中午": 12, "下午": 12, "傍晚": 17, "晚上": 12, "深夜": 23 }[m[1]];
+      let n = PARSE_CN_NUM[m[2]] ?? +m[2];
+      if (m[1] === "凌晨" && n === 12) n = 0;
+      let h = base + n;
+      if (h >= 24) h -= 24;
+      hits.push({ i: m.index, t: parsePad(h) + ":00" });
+    }
+    const re3 = /(凌晨|清晨|早上|上午|中午|下午|傍晚|晚上|深夜)/g;
+    while ((m = re3.exec(s))) {
+      const t = { "凌晨": "03:00", "清晨": "06:00", "早上": "08:00", "上午": "10:00", "中午": "12:00", "下午": "15:00", "傍晚": "18:00", "晚上": "19:00", "深夜": "22:00" }[m[1]];
+      if (!hits.some((h) => Math.abs(h.i - m.index) < 3)) hits.push({ i: m.index, t });
+    }
+    hits.sort((a, b) => a.i - b.i);
+    return hits.map((h) => h.t);
+  }
+
+  function parseAmount(s) {
+    let m = s.match(/(\d+(?:\.\d+)?)\s*万\s*盾/) || s.match(/(\d+(?:\.\d+)?)\s*万\s*[Vv][Nn][Dd]/);
+    if (m) {
+      const vnd = Math.round(+m[1] * 10000);
+      return { text: m[0], original: vnd, currency: "VND", baseCents: Math.round(vnd * 0.0285) };
+    }
+    m = s.match(/(\d+(?:\.\d+)?)\s*盾/) || s.match(/(\d+(?:\.\d+)?)\s*[Vv][Nn][Dd]/);
+    if (m) {
+      const vnd = Math.round(+m[1]);
+      return { text: m[0], original: vnd, currency: "VND", baseCents: Math.round(vnd * 0.0285) };
+    }
+    m = s.match(/(\d+(?:\.\d{1,2})?)\s*万\s*(?:元|块|rmb|RMB)/);
+    if (m) return { text: m[0], original: Math.round(+m[1] * 10000), currency: "CNY", baseCents: Math.round(+m[1] * 10000 * 100) };
+    m = s.match(/(\d+(?:\.\d{1,2})?)\s*(?:元|块|rmb|RMB)/);
+    if (m) return { text: m[0], original: Math.round(+m[1] * 100) / 100, currency: "CNY", baseCents: Math.round(+m[1] * 100) };
+    m = s.match(/[¥￥]\s*(\d+(?:\.\d{1,2})?)/);
+    if (m) return { text: m[0], original: +m[1], currency: "CNY", baseCents: Math.round(+m[1] * 100) };
+    return null;
+  }
+
+  function parseLedgerLine(line, travelers) {
+    const s = line.trim();
+    if (!s) return null;
+    if (/^(机票|酒店|航班|住宿|花销|消费|备注|注|行程|行程信息)[：:、]?\s*$/.test(s)) return null;
+    if (/^(以上为|下面是|如下)/.test(s)) return null;
+
+    const dInfo = parseDateInfo(s);
+    const times = parseTimes(s);
+    const flightNo = (s.match(/[A-Z]{2}\s?\d{3,4}/) || [""])[0];
+    const airline = ((s.match(/[（(]([\u4e00-\u9fa5A-Za-z ]+?(?:航空|航|Air))[)）]/) || [])[1] || "").trim();
+    const route = s.match(/([\u4e00-\u9fa5A-Za-z]+?)\s*飞\s*([\u4e00-\u9fa5A-Za-z]+?)(?=[，,。；;\s]|$)/) || [null, "", ""];
+    const hotelMatch = s.match(/(?:入住|住)\s*([\u4e00-\u9fa5A-Za-z&· ]+)\s*(酒店|度假村|民宿|宾馆|旅店)/);
+    let hotelName = "";
+    if (hotelMatch) {
+      hotelName = hotelMatch[1].replace(/^(胡志明|西贡|富国岛|河内|岘港|芽庄|大叻|美奈|会安|下龙湾)/, "").trim() + hotelMatch[2];
+    }
+
+    let category = "其他";
+    let note = "";
+    let isFlight = false;
+    let isHotel = false;
+    if (flightNo && (route[1] || /飞|航班|机票|抵达|起飞/.test(s))) {
+      category = "交通";
+      isFlight = true;
+      const dep = times[0] || "";
+      const arr = times[1] || "";
+      note = `✈️ ${flightNo}${airline ? " " + airline : ""} ${route[1] || "?"}→${route[2] || "?"}${dep ? " " + dep : ""}${arr ? "-" + arr : ""}`.replace(/\s+/g, " ").trim();
+    } else if (hotelMatch) {
+      category = "住宿";
+      isHotel = true;
+      const days = [...s.matchAll(/(\d{1,2})\s*[号日]/g)].map((m) => +m[1]);
+      const nights = days.length || 1;
+      note = `🏨 ${hotelName}（${nights}晚）`;
+    } else if (/打车|Grab|grab|出租|网约|的士|摩托|地铁|公交|轮渡|船票|缆车/.test(s) && !/门票/.test(s)) {
+      category = "交通";
+      note = s.slice(0, 60);
+    } else if (/门票|乐园|博物馆|演出|秀|动物园|水族馆/.test(s)) {
+      category = "门票";
+      note = s.slice(0, 60);
+    } else if (/吃|餐|咖啡|奶茶|烧烤|火锅|夜宵|小吃|喝|饭/.test(s)) {
+      category = "餐饮";
+      note = s.slice(0, 60);
+    } else if (/买|购物|超市|免税|特产|纪念品|衣服|鞋|包/.test(s)) {
+      category = "购物";
+      note = s.slice(0, 60);
+    } else {
+      category = "其他";
+      note = s.slice(0, 60);
+    }
+    const amt = parseAmount(s);
+    if (amt) note = s.replace(amt.text || "", "").replace(/[，,。\s]+$/g, "").slice(0, 60) || note;
+
+    let orderedAt = "";
+    if (dInfo) {
+      const t = isFlight ? (times[0] || "00:00") : isHotel ? "15:00" : (times[0] || "12:00");
+      orderedAt = `${dInfo.y}-${parsePad(dInfo.m)}-${parsePad(dInfo.d)}T${t}`;
+    } else {
+      const now = new Date();
+      orderedAt = `${now.getFullYear()}-${parsePad(now.getMonth() + 1)}-${parsePad(now.getDate())}T${parsePad(now.getHours())}:${parsePad(now.getMinutes())}`;
+    }
+
+    const nMatch = s.match(/([0-9一二两三四五六七八九十]{1,2})\s*人/);
+    let nPeople = nMatch ? (PARSE_CN_NUM[nMatch[1]] ?? +nMatch[1]) : null;
+    if (/请客|我付|我请/.test(s)) nPeople = 1;
+    if (!nPeople && /平摊|AA|均摊|大家/.test(s)) nPeople = travelers.length;
+
+    let participantIds;
+    if (isFlight) participantIds = travelers.length ? [travelers[0].id] : [];
+    else participantIds = travelers.slice(0, nPeople ? Math.min(nPeople, travelers.length) : travelers.length).map((t) => t.id);
+
+    return {
+      category,
+      note,
+      orderedAt,
+      currency: amt ? amt.currency : "CNY",
+      amountText: amt ? String(amt.original) : "",
+      payerId: travelers.length ? travelers[0].id : "",
+      participantIds
+    };
+  }
+
+  function renderParseRows() {
+    const box = ledgerRoot.querySelector("[data-parse-results]");
+    const footer = ledgerRoot.querySelector("[data-parse-footer]");
+    if (!box) return;
+    const catMark = { "餐饮": "🍜", "交通": "🚕", "住宿": "🏨", "门票": "🎫", "购物": "🛍️", "其他": "📦" };
+    box.innerHTML = parseDrafts.map((dr, idx) => {
+      const payerOpts = ledgerData.travelers.map((t) => `<option value="${escapeAttribute(t.id)}"${t.id === dr.payerId ? " selected" : ""}>${escapeHtml(t.name)}</option>`).join("");
+      const partChips = ledgerData.travelers.map((t) => `<label class="ledger-chip"><input type="checkbox" data-parse-part="${escapeAttribute(t.id)}"${dr.participantIds.includes(t.id) ? " checked" : ""}>${escapeHtml(t.name)}</label>`).join("");
+      const curLabel = dr.currency === "VND" ? "盾" : "¥";
+      return `
+      <div class="ledger-parse-row" data-parse-idx="${idx}">
+        <div class="ledger-parse-row-head">
+          <span>${catMark[dr.category] || ""} ${escapeHtml(dr.category)}</span>
+          <button type="button" class="ledger-text-button" data-ledger-action="parse-remove" data-parse-idx="${idx}">删除</button>
+        </div>
+        <label class="ledger-parse-field"><span>备注</span><input type="text" data-parse-field="note" value="${escapeAttribute(dr.note)}"></label>
+        <div class="ledger-parse-grid">
+          <label class="ledger-parse-field"><span>日期</span><input type="datetime-local" data-parse-field="orderedAt" value="${escapeAttribute(dr.orderedAt)}"></label>
+          <label class="ledger-parse-field"><span>金额(${curLabel})</span><input type="number" inputmode="decimal" min="0" step="0.01" data-parse-field="amount" placeholder="待填" value="${escapeAttribute(dr.amountText)}"></label>
+        </div>
+        <label class="ledger-parse-field"><span>买单人</span><select data-parse-field="payer">${payerOpts}</select></label>
+        <div class="ledger-parse-parts"><span class="ledger-parse-parts-label">分摊</span><div class="ledger-chip-row">${partChips}</div></div>
+      </div>`;
+    }).join("");
+    if (footer) footer.hidden = !parseDrafts.length;
+  }
+
+  function renderParseDialog() {
+    return `
+      <dialog class="ledger-dialog ledger-parse-dialog" data-ledger-dialog="parse">
+        <div class="ledger-dialog-header">
+          <div><p class="ledger-section-kicker">快捷录入</p><h3>📋 粘贴解析</h3></div>
+          <button class="ledger-text-button" type="button" data-ledger-action="close-parse">关闭</button>
+        </div>
+        <p class="ledger-parse-hint">把机票/酒店/花销文字整段粘进来，点「解析」自动拆成账单草稿。金额识别不到的先留空，补上后「全部入账」。</p>
+        <textarea class="ledger-parse-input" data-parse-input rows="7" placeholder="例：&#10;3号中午在Phở Hòa餐厅吃饭，4人平摊500元&#10;2号凌晨三点：VU8601航班（越旅行航空），深圳飞胡志明，04:50抵达&#10;2号3号晚入住胡志明AMAROU酒店"></textarea>
+        <div class="ledger-parse-actions">
+          <button class="ledger-primary-button" type="button" data-ledger-action="parse-run">🔍 解析</button>
+        </div>
+        <div class="ledger-parse-results" data-parse-results></div>
+        <div class="ledger-parse-footer" data-parse-footer hidden>
+          <button class="ledger-primary-button" type="button" data-ledger-action="parse-book-all">✅ 全部入账</button>
+        </div>
+      </dialog>`;
+  }
+
+  function runParse() {
+    const input = ledgerRoot.querySelector("[data-parse-input]");
+    const lines = (input?.value || "").split(/\n/);
+    parseDrafts = lines.map((l) => parseLedgerLine(l, ledgerData.travelers)).filter(Boolean);
+    renderParseRows();
+    if (!parseDrafts.length) setNotice("没识别出可记账的内容，检查粘贴的文字格式。");
+    else setNotice(`解析出 ${parseDrafts.length} 笔草稿：补上金额，点「全部入账」。`);
   }
 
   function renderBillForm() {
@@ -1304,6 +1508,7 @@
         ${renderStatsPage()}
         ${renderSummaryPage()}
         ${renderMembersDialog()}
+        ${renderParseDialog()}
         ${renderSettingsDialog()}
         ${renderCurrencyDialog()}
       </div>`;
@@ -1869,6 +2074,67 @@
       const amount = form.querySelector('input[name="originalAmount"]');
       amount?.focus();
       amount?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (action === "open-parse") {
+      parseDrafts = [];
+      const input = ledgerRoot.querySelector("[data-parse-input]");
+      if (input) input.value = "";
+      renderParseRows();
+      showDialog("parse");
+    } else if (action === "close-parse") {
+      closeDialog(button.closest("dialog"));
+    } else if (action === "parse-run") {
+      runParse();
+    } else if (action === "parse-remove") {
+      const idx = Number(button.dataset.parseIdx || 0);
+      parseDrafts.splice(idx, 1);
+      renderParseRows();
+      setNotice(`已删除第 ${idx + 1} 行草稿，还剩 ${parseDrafts.length} 行。`);
+    } else if (action === "parse-book-all") {
+      const rows = [...ledgerRoot.querySelectorAll(".ledger-parse-row[data-parse-idx]")];
+      const now = new Date().toISOString();
+      const baseCurrency = ledgerData.settings.baseCurrency;
+      const bills = [];
+      let skipped = 0;
+      rows.forEach((row) => {
+        const idx = Number(row.dataset.parseIdx || 0);
+        const dr = parseDrafts[idx];
+        if (!dr) return;
+        const note = (row.querySelector('[data-parse-field="note"]')?.value || "").trim();
+        const orderedAt = row.querySelector('[data-parse-field="orderedAt"]')?.value || "";
+        const amountVal = parseFloat(row.querySelector('[data-parse-field="amount"]')?.value || "");
+        const payerId = row.querySelector('[data-parse-field="payer"]')?.value || dr.payerId;
+        const participantIds = [...row.querySelectorAll("[data-parse-part]:checked")].map((c) => c.dataset.parsePart);
+        if (!(amountVal > 0)) { skipped += 1; return; }
+        const currency = dr.currency === "VND" ? "VND" : baseCurrency;
+        const originalAmountCents = currency === "VND" ? Math.round(amountVal) : Math.round(amountVal * 100);
+        const baseAmountCents = currency === "VND" ? Math.round(amountVal * 0.0285) : Math.round(amountVal * 100);
+        bills.push({
+          id: makeId("bill"),
+          originalAmountCents,
+          baseAmountCents,
+          currency,
+          category: dr.category,
+          note: note || dr.note,
+          orderedAt,
+          payerId,
+          participantIds: participantIds.length ? participantIds : [payerId],
+          createdAt: now,
+          updatedAt: now
+        });
+      });
+      if (!bills.length) {
+        setNotice(`没有可入账的行：${skipped} 行未填金额。`);
+        return;
+      }
+      mutateData((next) => { next.bills.push(...bills); }, {
+        reason: "bill-added",
+        message: `已入账 ${bills.length} 笔${skipped ? `，跳过 ${skipped} 行未填金额` : ""}。`,
+        afterSuccess: () => {
+          parseDrafts = [];
+          const dialog = ledgerRoot.querySelector('[data-ledger-dialog="parse"]');
+          if (dialog) closeDialog(dialog);
+        }
+      });
     } else if (action === "open-members") {
       captureBillDraft();
       showDialog("members");
