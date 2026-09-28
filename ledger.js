@@ -634,6 +634,25 @@
     }).join("");
   }
 
+  const QUICK_TEMPLATES = [
+    { id: "meal", label: "🍜 聚餐AA", category: "餐饮", mode: "all" },
+    { id: "ride", label: "🚕 打车AA", category: "交通", mode: "all" },
+    { id: "hotel", label: "🏨 住宿AA", category: "住宿", mode: "all" },
+    { id: "ticket", label: "🎫 门票AA", category: "门票", mode: "all" },
+    { id: "flight", label: "✈️ 机票单人", category: "交通", mode: "single" },
+    { id: "shop", label: "🛍 购物单人", category: "购物", mode: "single" },
+    { id: "other", label: "📦 其他AA", category: "其他", mode: "all" }
+  ];
+
+  function renderQuickTemplates() {
+    return `
+      <div class="ledger-quick-tpls" aria-label="快捷模板：点一下填好分类和分摊人，只填金额即可">
+        <span class="ledger-quick-tpls-label">快捷</span>
+        ${QUICK_TEMPLATES.map((t) => `
+          <button type="button" class="ledger-quick-tpl" data-ledger-action="apply-template" data-ledger-template="${escapeAttribute(t.id)}">${escapeHtml(t.label)}</button>`).join("")}
+      </div>`;
+  }
+
   function renderBillForm() {
     const editingBill = ledgerData.bills.find((bill) => bill.id === editingBillId) || null;
     const draft = editingBill ? null : billDraft;
@@ -658,6 +677,7 @@
         </div>
         ${ledgerData.travelers.length ? `
           <form class="ledger-bill-form" data-ledger-form="bill" novalidate>
+            ${editingBill ? "" : renderQuickTemplates()}
             <div class="ledger-amount-block">
               <label class="ledger-field ledger-field-currency">
                 <span class="ledger-field-label">币种</span>
@@ -1818,6 +1838,37 @@
     } else if (action === "filter-bill-cat") {
       billCatFilter = button.dataset.ledgerCat || "__all";
       renderApp();
+    } else if (action === "apply-template") {
+      const tpl = QUICK_TEMPLATES.find((t) => t.id === button.dataset.ledgerTemplate);
+      const form = ledgerRoot.querySelector('[data-ledger-form="bill"]');
+      if (!tpl || !form) return;
+      const catRadio = form.querySelector(`input[name="category"][value="${CSS.escape(tpl.category)}"]`);
+      if (catRadio) catRadio.checked = true;
+      const parts = form.querySelectorAll('input[name="participantIds"]');
+      const payerRadios = [...form.querySelectorAll('input[name="payerId"]')];
+      if (tpl.mode === "all") {
+        parts.forEach((c) => { c.checked = true; });
+        if (![...payerRadios].some((r) => r.checked) && payerRadios.length) payerRadios[0].checked = true;
+      } else {
+        parts.forEach((c) => { c.checked = false; });
+        const first = payerRadios[0];
+        if (first) {
+          first.checked = true;
+          const cb = [...parts].find((c) => c.value === first.value);
+          if (cb) cb.checked = true;
+        }
+      }
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const dateInput = form.querySelector('input[name="orderedAt"]');
+      if (dateInput && !dateInput.value) dateInput.value = today;
+      const split = form.querySelector("[data-ledger-split-summary]");
+      if (split) syncSplitSummary();
+      setNotice(`已套用「${tpl.label}」：分类、分摊人、日期已填好，输入金额保存即可。`);
+      const amount = form.querySelector('input[name="originalAmount"]');
+      amount?.focus();
+      amount?.scrollIntoView({ behavior: "smooth", block: "center" });
     } else if (action === "open-members") {
       captureBillDraft();
       showDialog("members");
