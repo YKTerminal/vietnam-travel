@@ -422,3 +422,43 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
   .ledger-member-edit-row-static .ledger-member-edit-actions { gap: 0; }
   .ledger-member-edit-actions .ledger-text-button, .ledger-member-edit-actions .ledger-icon-button { padding-inline: 4px; }
 }
+
+/* ===== 2026-09-27 花费统计页 ===== */
+.ledger-summary-panel .ledger-section-heading { margin-bottom: 10px; }
+.ledger-quick-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid #e2e8e2; border-radius: 12px; margin-bottom: 8px; background: #fbfdfb; }
+.ledger-quick-name { flex: 1 1 100%; font-size: 13.5px; font-weight: 700; color: #24342b; }
+.ledger-quick-name small { display: block; font-size: 11px; color: #7a8a80; font-weight: 500; margin-top: 2px; }
+.ledger-quick-ctl { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ledger-quick-ctl input { width: 92px; font-size: 14px; padding: 8px 9px; border: 1px solid #c9d6c9; border-radius: 9px; background: #fff; }
+.ledger-quick-ctl select { max-width: 120px; font-size: 13px; padding: 8px 6px; border: 1px solid #c9d6c9; border-radius: 9px; background: #fff; }
+.ledger-quick-ctl button { font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 9px; border: none; background: #176b3a; color: #fff; cursor: pointer; }
+.ledger-quick-ctl button:active { transform: scale(0.97); }
+.ledger-cat-list { display: flex; flex-direction: column; gap: 8px; }
+.ledger-cat-row { display: grid; grid-template-columns: 84px 1fr 88px; gap: 10px; align-items: center; }
+.ledger-cat-name { font-size: 13px; font-weight: 700; color: #334; }
+.ledger-cat-name small { display: block; font-weight: 500; color: #98a49b; font-size: 10.5px; }
+.ledger-cat-bar { height: 12px; background: #eef2ee; border-radius: 6px; overflow: hidden; }
+.ledger-cat-bar i { display: block; height: 100%; border-radius: 6px; background: #4a9062; }
+.ledger-cat-row[data-cat="餐饮"] .ledger-cat-bar i { background: #d97706; }
+.ledger-cat-row[data-cat="交通"] .ledger-cat-bar i { background: #2563eb; }
+.ledger-cat-row[data-cat="住宿"] .ledger-cat-bar i { background: #7c3aed; }
+.ledger-cat-row[data-cat="门票"] .ledger-cat-bar i { background: #0d9488; }
+.ledger-cat-row[data-cat="购物"] .ledger-cat-bar i { background: #db2777; }
+.ledger-cat-row[data-cat="其他"] .ledger-cat-bar i { background: #64748b; }
+.ledger-cat-amount { font-size: 13px; font-weight: 700; text-align: right; }
+.ledger-day-row { display: flex; align-items: center; gap: 8px; padding: 8px 4px; border-bottom: 1px solid #edf1ed; font-size: 13px; }
+.ledger-day-row span { flex: 1; font-weight: 600; }
+.ledger-day-row small { color: #98a49b; }
+.ledger-day-row b { font-size: 13px; }
+.ledger-member-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid #edf1ed; }
+.ledger-member-id { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; }
+.ledger-member-nums { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 11.5px; color: #5c6b63; }
+.ledger-member-nums b { font-size: 12.5px; color: #24342b; }
+.ledger-member-nums .is-credit { color: #b45309; font-weight: 700; }
+.ledger-member-nums .is-debit { color: #1d4ed8; font-weight: 700; }
+.ledger-hint { font-size: 11.5px; color: #77867c; line-height: 1.6; margin: 8px 0 0; background: #f6f9f6; border-radius: 8px; padding: 8px 10px; }
+.ledger-empty { font-size: 13px; color: #8a968d; }
+@media (max-width: 699px) {
+  .ledger-cat-row { grid-template-columns: 64px 1fr 76px; }
+  .ledger-quick-ctl input { width: 80px; }
+}

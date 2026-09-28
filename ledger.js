@@ -934,6 +934,168 @@
     }).join("");
   }
 
+
+  function summaryQuickRows() {
+    const data = window.TRAVEL_PLAN_DATA;
+    const rows = [];
+    (data?.flights || []).forEach((f, i) => {
+      rows.push({
+        kind: "flight",
+        date: f.departure?.date || "",
+        name: `✈️ 机票 ${f.flightNumber || "第" + (i + 1) + "程"} · ${f.departure?.city || ""} → ${f.arrival?.city || ""}`,
+        category: "交通"
+      });
+    });
+    (data?.accommodations || []).forEach((a) => {
+      rows.push({
+        kind: "stay",
+        date: a.checkIn || "",
+        name: `🏨 酒店 ${a.name || ""}`,
+        category: "住宿"
+      });
+    });
+    return rows;
+  }
+
+  function renderSummaryPage() {
+    const stats = calculateStats();
+    const baseCurrency = ledgerData.settings.baseCurrency;
+    const travelers = ledgerData.travelers;
+    const totalCents = ledgerData.bills.reduce((s, b) => s + b.baseAmountCents, 0);
+    const days = new Set(ledgerData.bills.map((b) => String(b.orderedAt || "").slice(0, 10))).size;
+    const catTotals = new Map(CATEGORIES.map((c) => [c, { cents: 0, count: 0 }]));
+    ledgerData.bills.forEach((b) => {
+      const t = catTotals.get(b.category) || { cents: 0, count: 0 };
+      t.cents += b.baseAmountCents; t.count += 1;
+      catTotals.set(b.category, t);
+    });
+    const maxCat = Math.max(1, ...[...catTotals.values()].map((t) => t.cents));
+    const catBars = CATEGORIES.map((c) => {
+      const t = catTotals.get(c) || { cents: 0, count: 0 };
+      const pct = Math.round((t.cents / maxCat) * 100);
+      return `<div class="ledger-cat-row" data-cat="${escapeHtml(c)}">
+        <span class="ledger-cat-name">${escapeHtml(c)}<small>${t.count} 笔</small></span>
+        <span class="ledger-cat-bar"><i style="width:${pct}%"></i></span>
+        <span class="ledger-cat-amount">${escapeHtml(formatMoney(t.cents, baseCurrency))}</span>
+      </div>`;
+    }).join("");
+
+    const dayMap = new Map();
+    ledgerData.bills.forEach((b) => {
+      const key = String(b.orderedAt || "").slice(0, 10) || "未标日期";
+      const t = dayMap.get(key) || { cents: 0, count: 0 };
+      t.cents += b.baseAmountCents; t.count += 1;
+      dayMap.set(key, t);
+    });
+    const dayHtml = dayMap.size
+      ? [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([d, t]) => `
+      <div class="ledger-day-row"><span>${escapeHtml(d)}</span><small>${t.count} 笔</small><b>${escapeHtml(formatMoney(t.cents, baseCurrency))}</b></div>`).join("")
+      : `<p class="ledger-empty">还没有账单，先去"记账"页记第一笔。</p>`;
+
+    const memberHtml = stats.members.map((m) => {
+      const net = m.netCents;
+      const netText = net > 0 ? `垫付 ${formatMoney(net, baseCurrency)} 等大家转` : net < 0 ? `还需转出 ${formatMoney(-net, baseCurrency)}` : "已平账";
+      return `<div class="ledger-member-row">
+        <div class="ledger-member-id">${renderAvatar(m.traveler)}<span>${escapeHtml(m.traveler.name)}</span></div>
+        <div class="ledger-member-nums">
+          <span>应付 <b>${escapeHtml(formatMoney(m.owedCents, baseCurrency))}</b></span>
+          <span>实付 <b>${escapeHtml(formatMoney(m.paidCents, baseCurrency))}</b></span>
+          <span class="${net > 0 ? "is-credit" : net < 0 ? "is-debit" : ""}">${escapeHtml(netText)}</span>
+        </div>
+      </div>`;
+    }).join("");
+
+    const quick = summaryQuickRows();
+    const quickHtml = travelers.length
+      ? quick.map((r, i) => `
+      <div class="ledger-quick-row" data-summary-kind="${escapeHtml(r.kind)}">
+        <div class="ledger-quick-name"><span>${escapeHtml(r.name)}</span><small>${escapeHtml(r.date)} · ${escapeHtml(r.category)}</small></div>
+        <div class="ledger-quick-ctl">
+          <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="金额¥" data-summary-amount aria-label="${escapeHtml(r.name)}金额">
+          <select data-summary-payer aria-label="买单人">${travelers.map((t, ti) => `<option value="${escapeHtml(t.id)}"${ti === 0 ? " selected" : ""}>${escapeHtml(t.name)}</option>`).join("")}</select>
+          <button type="button" data-ledger-action="summary-book" data-summary-row="${i}">入账</button>
+        </div>
+      </div>`).join("")
+      : `<p class="ledger-empty">先在"记账"页添加 4 位同行人，再回来速录机酒。</p>`;
+
+    return `
+      <section class="ledger-tab-panel ledger-summary-panel" data-ledger-panel="summary" role="tabpanel" aria-labelledby="ledger-summary-tab" ${activeTab === "summary" ? "" : "hidden"}>
+        <section class="ledger-stats-overview" aria-labelledby="ledger-summary-title">
+          <p class="ledger-section-kicker">花费统计</p>
+          <h2 id="ledger-summary-title">${escapeHtml(formatMoney(totalCents, baseCurrency))}</h2>
+          <span>${ledgerData.bills.length} 笔账单 · 覆盖 ${days} 天 · 以 ${escapeHtml(baseCurrency)} 结算</span>
+        </section>
+
+        <section class="ledger-summary-section">
+          <div class="ledger-section-heading">
+            <div><p class="ledger-section-kicker">机酒大头</p><h2>机票酒店速录（已购）</h2></div>
+          </div>
+          ${quickHtml}
+          <p class="ledger-hint">✈️🏨 按你们已确认的 3 程机票 + 4 家酒店预置：填金额、选买单人、点"入账"即计入统计，默认 4 人平分。重复点会提示已入过账。</p>
+        </section>
+
+        <section class="ledger-summary-section">
+          <div class="ledger-section-heading">
+            <div><p class="ledger-section-kicker">分类花销</p><h2>钱花在哪了</h2></div>
+          </div>
+          <div class="ledger-cat-list">${catBars}</div>
+        </section>
+
+        <section class="ledger-summary-section">
+          <div class="ledger-section-heading">
+            <div><p class="ledger-section-kicker">每天花销</p><h2>逐日一览</h2></div>
+          </div>
+          <div class="ledger-day-list">${dayHtml}</div>
+        </section>
+
+        <section class="ledger-summary-section">
+          <div class="ledger-section-heading">
+            <div><p class="ledger-section-kicker">人均花销</p><h2>每人应付 vs 实付</h2></div>
+          </div>
+          <div class="ledger-member-list">${memberHtml}</div>
+          ${stats.transfers.length ? `<p class="ledger-hint">↔️ 有 ${stats.transfers.length} 笔转账待结，谁转给谁看"账单结算"页。</p>` : ""}
+        </section>
+
+        <section class="ledger-summary-section">
+          <p class="ledger-hint">💡 记账小贴士：请客 = 记这笔时参与者只勾买单人自己；越南盾付款切 ₫ 币种自动换算成人民币；数据只存本机浏览器，建议推举 1 位"财务官"统一记，其余人花钱后微信转告。</p>
+        </section>
+      </section>`;
+  }
+
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest('[data-ledger-action="summary-book"]');
+    if (!btn || !ledgerData) return;
+    const rowEl = btn.closest(".ledger-quick-row");
+    const amountInput = rowEl?.querySelector("[data-summary-amount]");
+    const payerSel = rowEl?.querySelector("[data-summary-payer]");
+    const rows = summaryQuickRows();
+    const row = rows[Number(btn.dataset.summaryRow || 0)];
+    if (!row || !amountInput || !payerSel) return;
+    const cents = toCents(amountInput.value);
+    if (!cents || cents <= 0) { setNotice("先填这一项的金额（¥）再入账。"); amountInput.focus(); return; }
+    const payerId = payerSel.value;
+    if (!travelerById(payerId)) { setNotice("请选择买单人。"); return; }
+    const dup = ledgerData.bills.some((b) => b.note === row.name && String(b.orderedAt || "").slice(0, 10) === row.date);
+    if (dup) { setNotice("这一项已经入过账了。"); return; }
+    const now = new Date().toISOString();
+    const baseCurrency = ledgerData.settings.baseCurrency;
+    mutateData((next) => {
+      next.bills.push({
+        id: makeId("bill"),
+        originalAmountCents: cents,
+        baseAmountCents: cents,
+        currency: baseCurrency,
+        category: row.category,
+        note: row.name,
+        orderedAt: row.date,
+        payerId,
+        participantIds: ledgerData.travelers.map((t) => t.id),
+        createdAt: now,
+        updatedAt: now
+      });
+    }, { reason: "bill-added", message: `已入账：${row.name} ${formatMoney(cents, baseCurrency)}` });
+  });
+
   function renderStatsPage() {
     const stats = calculateStats();
     const baseCurrency = ledgerData.settings.baseCurrency;
@@ -1173,10 +1335,12 @@
         <nav class="ledger-tabs" role="tablist" aria-label="记账页面">
           <button id="ledger-entry-tab" class="ledger-tab ${activeTab === "entry" ? "ledger-is-active" : ""}" type="button" role="tab" aria-selected="${activeTab === "entry"}" data-ledger-action="set-tab" data-ledger-tab="entry">记账</button>
           <button id="ledger-stats-tab" class="ledger-tab ${activeTab === "stats" ? "ledger-is-active" : ""}" type="button" role="tab" aria-selected="${activeTab === "stats"}" data-ledger-action="set-tab" data-ledger-tab="stats">账单结算</button>
+          <button id="ledger-summary-tab" class="ledger-tab ${activeTab === "summary" ? "ledger-is-active" : ""}" type="button" role="tab" aria-selected="${activeTab === "summary"}" data-ledger-action="set-tab" data-ledger-tab="summary">📊 统计</button>
         </nav>
         <div class="ledger-live" role="status" aria-live="polite">${escapeHtml(notice)}</div>
         ${renderEntryPage()}
         ${renderStatsPage()}
+        ${renderSummaryPage()}
         ${renderMembersDialog()}
         ${renderSettingsDialog()}
         ${renderCurrencyDialog()}
@@ -1824,7 +1988,7 @@
   }
 
   function setActiveTab(tab, options = {}) {
-    const nextTab = tab === "stats" ? "stats" : "entry";
+    const nextTab = ["stats", "summary"].includes(tab) ? tab : "entry";
     if (editingNoteBillId && !options.skipNoteFlush) {
       void flushActiveBillNote().then((saved) => {
         if (saved) setActiveTab(nextTab, { ...options, skipNoteFlush: true });
