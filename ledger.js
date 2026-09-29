@@ -149,6 +149,8 @@
   let notice = "";
   let billDraft = null;
   let billCatFilter = "__all";
+  let billMultiMode = false;
+  let billSelectedIds = new Set();
   let editingMemberId = null;
   let editingNoteBillId = null;
   let pendingNoteSave = null;
@@ -1132,8 +1134,10 @@
     const payer = travelerById(bill.payerId);
     const participants = bill.participantIds.map(travelerById).filter(Boolean);
     const baseCurrency = ledgerData.settings.baseCurrency;
+    const isChecked = billMultiMode && billSelectedIds.has(bill.id);
     return `
-      <article class="ledger-bill-row" data-ledger-bill-id="${escapeAttribute(bill.id)}">
+      <article class="ledger-bill-row${billMultiMode ? " ledger-multi" : ""}${isChecked ? " ledger-is-selected" : ""}" data-ledger-bill-id="${escapeAttribute(bill.id)}">
+        ${billMultiMode ? `<button type="button" class="ledger-bill-check${isChecked ? " ledger-is-checked" : ""}" data-ledger-action="toggle-bill-select" data-ledger-id="${escapeAttribute(bill.id)}" aria-pressed="${isChecked}">${isChecked ? "✓" : ""}</button>` : ""}
         <div class="ledger-bill-main">
           <div class="ledger-bill-title-row">
             <span class="ledger-category-mark" data-ledger-category="${escapeAttribute(bill.category)}" aria-hidden="true"></span>
@@ -1198,10 +1202,18 @@
           </div>
         </div>
         ${bills.length ? `
+          <div class="ledger-bill-tools">
+            <button type="button" class="ledger-text-button${billMultiMode ? " ledger-is-active" : ""}" data-ledger-action="toggle-bill-multi">${billMultiMode ? "完成" : "☑ 多选删除"}</button>
+          </div>
           ${tabs}
           ${filtered.length
             ? `<div class="ledger-bill-list">${filtered.map(renderBillRow).join("")}</div>`
             : `<div class="ledger-empty-state"><p>该类别还没有账单。</p></div>`}
+          ${billMultiMode ? `
+          <div class="ledger-multi-bar" data-ledger-multi-bar>
+            <button type="button" class="ledger-text-button" data-ledger-action="bill-select-all">${filtered.length && filtered.every((b) => billSelectedIds.has(b.id)) ? "取消全选" : "全选本页"}</button>
+            <button type="button" class="ledger-danger-button" data-ledger-action="delete-bills-selected" ${billSelectedIds.size ? "" : "disabled"}>删除所选${billSelectedIds.size ? ` ${billSelectedIds.size} 笔` : ""}</button>
+          </div>` : ""}
         ` : `<div class="ledger-empty-state"><p>记下第一笔花费后，账单会按类别筛选显示在这里。</p></div>`}
       </section>`;
   }
@@ -1287,7 +1299,10 @@
               <span class="ledger-day-bill-note">${escapeHtml(b.note || b.category)}</span>
               <b>${escapeHtml(amount)}${escapeHtml(converted)}</b>
             </div>
-            <div class="ledger-day-bill-sub">${escapeHtml(payer?.name || "")}付 · ${parts.map((p) => escapeHtml(p.name)).join("、")}分摊</div>
+            <div class="ledger-day-bill-sub">
+              <span>${escapeHtml(payer?.name || "")}付 · ${parts.map((p) => escapeHtml(p.name)).join("、")}分摊</span>
+              <button type="button" class="ledger-day-del" data-ledger-action="delete-bill" data-ledger-id="${escapeAttribute(b.id)}">删除</button>
+            </div>
           </li>`;
         }).join("");
         return `<div class="ledger-day-cat">
@@ -2033,6 +2048,16 @@
     }, { reason: "member-deleted", message: `${traveler.name}已移除` });
   }
 
+  async function deleteSelectedBills() {
+    const ids = [...billSelectedIds];
+    if (!ids.length) return;
+    if (!await confirmLedgerAction(`删除选中的 ${ids.length} 笔账单？`)) return;
+    billMultiMode = false;
+    await mutateData((next) => {
+      next.bills = next.bills.filter((b) => !billSelectedIds.has(b.id));
+    }, { reason: "bills-deleted", message: `已删除 ${ids.length} 笔账单`, afterSuccess() { billSelectedIds.clear(); } });
+  }
+
   async function deleteBill(id) {
     const bill = ledgerData.bills.find((entry) => entry.id === id);
     if (!bill || !await confirmLedgerAction("删除这笔账单？")) return;
@@ -2238,6 +2263,35 @@
       deleteMember(button.dataset.ledgerId || "");
     } else if (action === "edit-bill") {
       editBill(button.dataset.ledgerId || "");
+    } else if (action === "toggle-bill-multi") {
+      billMultiMode = !billMultiMode;
+      billSelectedIds.clear();
+      renderApp();
+    } else if (action === "toggle-bill-select") {
+      const id = button.dataset.ledgerId || "";
+      if (billSelectedIds.has(id)) billSelectedIds.delete(id);
+      else billSelectedIds.add(id);
+      const checked = billSelectedIds.has(id);
+      const row = ledgerRoot.querySelector(`[data-ledger-bill-id="${CSS.escape(id)}"]`);
+      row?.classList.toggle("ledger-is-selected", checked);
+      button.classList.toggle("ledger-is-checked", checked);
+      button.textContent = checked ? "✓" : "";
+      button.setAttribute("aria-pressed", String(checked));
+      const bar = ledgerRoot.querySelector("[data-ledger-multi-bar]");
+      if (bar) {
+        const del = bar.querySelector('[data-ledger-action="delete-bills-selected"]');
+        if (del) {
+          del.disabled = !billSelectedIds.size;
+          del.textContent = `删除所选${billSelectedIds.size ? ` ${billSelectedIds.size} 笔` : ""}`;
+        }
+      }
+    } else if (action === "bill-select-all") {
+      const visible = [...ledgerRoot.querySelectorAll("[data-ledger-bill-id]")].map((el) => el.dataset.ledgerBillId);
+      const all = visible.every((id) => billSelectedIds.has(id));
+      visible.forEach((id) => { if (all) billSelectedIds.delete(id); else billSelectedIds.add(id); });
+      renderApp();
+    } else if (action === "delete-bills-selected") {
+      void deleteSelectedBills();
     } else if (action === "delete-bill") {
       deleteBill(button.dataset.ledgerId || "");
     } else if (action === "edit-bill-note") {
