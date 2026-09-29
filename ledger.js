@@ -849,6 +849,18 @@
     return out;
   }
 
+  function billSignature(b) {
+    return [
+      b.category || "",
+      b.currency || "",
+      b.originalAmountCents ?? "",
+      (b.orderedAt || "").slice(0, 16),
+      (b.note || "").trim(),
+      b.payerId || "",
+      [...(b.participantIds || [])].sort().join(",")
+    ].join("|");
+  }
+
   function renderParseRows() {
     const box = ledgerRoot.querySelector("[data-parse-results]");
     const footer = ledgerRoot.querySelector("[data-parse-footer]");
@@ -2148,7 +2160,9 @@
       const now = new Date().toISOString();
       const baseCurrency = ledgerData.settings.baseCurrency;
       const bills = [];
+      const existing = new Set(ledgerData.bills.map(billSignature));
       let skipped = 0;
+      let dup = 0;
       rows.forEach((row) => {
         const idx = Number(row.dataset.parseIdx || 0);
         const dr = parseDrafts[idx];
@@ -2162,7 +2176,7 @@
         const currency = dr.currency === "VND" ? "VND" : baseCurrency;
         const originalAmountCents = currency === "VND" ? Math.round(amountVal) : Math.round(amountVal * 100);
         const baseAmountCents = currency === "VND" ? Math.round(amountVal * 0.0285) : Math.round(amountVal * 100);
-        bills.push({
+        const bill = {
           id: makeId("bill"),
           originalAmountCents,
           baseAmountCents,
@@ -2174,15 +2188,19 @@
           participantIds: participantIds.length ? participantIds : [payerId],
           createdAt: now,
           updatedAt: now
-        });
+        };
+        const sig = billSignature(bill);
+        if (existing.has(sig)) { dup += 1; return; }
+        existing.add(sig);
+        bills.push(bill);
       });
       if (!bills.length) {
-        setNotice(`没有可入账的行：${skipped} 行未填金额。`);
+        setNotice(`没有可入账的行：${skipped} 行未填金额${dup ? `，${dup} 笔与已有账单重复` : ""}。`);
         return;
       }
       mutateData((next) => { next.bills.push(...bills); }, {
         reason: "bill-added",
-        message: `已入账 ${bills.length} 笔${skipped ? `，跳过 ${skipped} 行未填金额` : ""}。`,
+        message: `已入账 ${bills.length} 笔${skipped ? `，跳过 ${skipped} 行未填金额` : ""}${dup ? `，跳过 ${dup} 笔重复` : ""}。`,
         afterSuccess: () => {
           parseDrafts = [];
           const dialog = ledgerRoot.querySelector('[data-ledger-dialog="parse"]');
