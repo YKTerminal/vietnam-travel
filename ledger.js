@@ -773,15 +773,6 @@
     const amt = parseAmount(s);
     if (amt) note = s.replace(amt.text || "", "").replace(/[，,。\s]+$/g, "").slice(0, 60) || note;
 
-    let orderedAt = "";
-    if (dInfo) {
-      const t = isFlight ? (times[0] || "00:00") : isHotel ? "15:00" : (times[0] || "12:00");
-      orderedAt = `${dInfo.y}-${parsePad(dInfo.m)}-${parsePad(dInfo.d)}T${t}`;
-    } else {
-      const now = new Date();
-      orderedAt = `${now.getFullYear()}-${parsePad(now.getMonth() + 1)}-${parsePad(now.getDate())}T${parsePad(now.getHours())}:${parsePad(now.getMinutes())}`;
-    }
-
     const nMatch = s.match(/([0-9一二两三四五六七八九十]{1,2})\s*人/);
     let nPeople = nMatch ? (PARSE_CN_NUM[nMatch[1]] ?? +nMatch[1]) : null;
     if (/请客|我付|我请/.test(s)) nPeople = 1;
@@ -791,15 +782,71 @@
     if (isFlight) participantIds = travelers.length ? [travelers[0].id] : [];
     else participantIds = travelers.slice(0, nPeople ? Math.min(nPeople, travelers.length) : travelers.length).map((t) => t.id);
 
-    return {
+    const make = (dateStr, noteStr, amountStr, hour) => ({
       category,
-      note,
-      orderedAt,
+      note: noteStr,
+      orderedAt: dateStr + "T" + hour,
       currency: amt ? amt.currency : "CNY",
-      amountText: amt ? String(amt.original) : "",
+      amountText: amountStr,
       payerId: travelers.length ? travelers[0].id : "",
-      participantIds
-    };
+      participantIds: [...participantIds]
+    });
+
+    // 日期字符串
+    let dateBase = "";
+    if (dInfo) dateBase = `${dInfo.y}-${parsePad(dInfo.m)}`;
+    else {
+      const now = new Date();
+      dateBase = `${now.getFullYear()}-${parsePad(now.getMonth() + 1)}`;
+    }
+
+    // 酒店：连住多晚按晚拆开，每晚一笔
+    if (isHotel && dInfo) {
+      const days = [...s.matchAll(/(\d{1,2})\s*[号日]/g)].map((m) => +m[1]);
+      if (days.length > 1) {
+        const per = amt ? Math.round((amt.original / days.length) * 100) / 100 : null;
+        return days.map((d, idx) => make(
+          `${dateBase}-${parsePad(d)}`,
+          `🏨 ${hotelName}（第${idx + 1}晚/共${days.length}晚）`,
+          per ? String(per) : "",
+          "15:00"
+        ));
+      }
+    }
+
+    // 普通单笔
+    let dateStr = "";
+    let hour = "12:00";
+    if (dInfo) {
+      dateStr = `${dateBase}-${parsePad(dInfo.d)}`;
+      hour = isFlight ? (times[0] || "00:00") : isHotel ? "15:00" : (times[0] || "12:00");
+    } else {
+      const now = new Date();
+      dateStr = `${dateBase}-${parsePad(now.getDate())}`;
+      hour = `${parsePad(now.getHours())}:${parsePad(now.getMinutes())}`;
+    }
+    return make(dateStr, note, amt ? String(amt.original) : "", hour);
+  }
+
+  function applySelfSplit(drafts, fullText, travelers) {
+    if (!/各自|各买|各付|各订|各人|自己买|自己订|自己付|分开买|分开订|各自付/.test(fullText)) return drafts;
+    const n = travelers.length;
+    if (n < 2) return drafts;
+    const perMatch = fullText.match(/每人\s*(\d+(?:\.\d{1,2})?)\s*(?:元|块|¥|￥|rmb|RMB)/i);
+    const out = [];
+    for (const dr of drafts) {
+      const per = perMatch ? +perMatch[1] : (dr.amountText ? Math.round((+dr.amountText / n) * 100) / 100 : null);
+      for (let i = 0; i < n; i++) {
+        out.push({
+          ...dr,
+          note: `${dr.note} · ${travelers[i].name}自己付`,
+          payerId: travelers[i].id,
+          participantIds: [travelers[i].id],
+          amountText: per !== null ? String(per) : ""
+        });
+      }
+    }
+    return out;
   }
 
   function renderParseRows() {
@@ -836,7 +883,7 @@
           <div><p class="ledger-section-kicker">快捷录入</p><h3>📋 粘贴解析</h3></div>
           <button class="ledger-text-button" type="button" data-ledger-action="close-parse">关闭</button>
         </div>
-        <p class="ledger-parse-hint">把机票/酒店/花销文字整段粘进来，点「解析」自动拆成账单草稿。金额识别不到的先留空，补上后「全部入账」。</p>
+        <p class="ledger-parse-hint">把机票/酒店/花销文字整段粘进来，点「解析」自动拆成账单草稿。酒店连住多晚自动按晚拆开；文本带「各自买/各付」会按人头每人记一笔。金额识别不到的先留空，补上后「全部入账」。</p>
         <textarea class="ledger-parse-input" data-parse-input rows="7" placeholder="例：&#10;3号中午在Phở Hòa餐厅吃饭，4人平摊500元&#10;2号凌晨三点：VU8601航班（越旅行航空），深圳飞胡志明，04:50抵达&#10;2号3号晚入住胡志明AMAROU酒店"></textarea>
         <div class="ledger-parse-actions">
           <button class="ledger-primary-button" type="button" data-ledger-action="parse-run">🔍 解析</button>
@@ -850,8 +897,15 @@
 
   function runParse() {
     const input = ledgerRoot.querySelector("[data-parse-input]");
-    const lines = (input?.value || "").split(/\n/);
-    parseDrafts = lines.map((l) => parseLedgerLine(l, ledgerData.travelers)).filter(Boolean);
+    const raw = input?.value || "";
+    const drafts = [];
+    for (const l of raw.split(/\n/)) {
+      const parsed = parseLedgerLine(l, ledgerData.travelers);
+      if (!parsed) continue;
+      if (Array.isArray(parsed)) drafts.push(...parsed);
+      else drafts.push(parsed);
+    }
+    parseDrafts = applySelfSplit(drafts, raw, ledgerData.travelers);
     renderParseRows();
     if (!parseDrafts.length) setNotice("没识别出可记账的内容，检查粘贴的文字格式。");
     else setNotice(`解析出 ${parseDrafts.length} 笔草稿：补上金额，点「全部入账」。`);
