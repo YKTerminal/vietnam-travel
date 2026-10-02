@@ -662,6 +662,25 @@
 
   function parsePad(n) { return String(n).padStart(2, "0"); }
 
+  function vndRate() {
+    const v = parseFloat((typeof window !== "undefined" ? window.localStorage?.getItem("vn-fx-rate") : null) || "0.000285");
+    return v > 0 ? v : 0.000285;
+  }
+
+  function autoConvertBaseAmount(form) {
+    const codeField = form?.querySelector('[data-ledger-field="currency"]');
+    const originalField = form?.querySelector('[data-ledger-field="original-amount"]');
+    const baseField = form?.querySelector('[data-ledger-field="base-amount"]');
+    if (!codeField || !originalField || !baseField) return;
+    if ((codeField.value || "").toUpperCase() !== "VND") return;
+    const vnd = parseFloat((originalField.value || "").replace(/[，,]/g, ""));
+    if (!(vnd > 0)) return;
+    const yuan = vnd * vndRate();
+    baseField.value = String(Math.round(yuan * 100) / 100);
+    const help = form.querySelector(".ledger-converted-field .ledger-field-help");
+    if (help) help.textContent = `按 1盾=¥${vndRate()} 自动换算，可手动改`;
+  }
+
   function parseDateInfo(s) {
     const m1 = s.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*[号日]/);
     if (m1) return { y: new Date().getFullYear(), m: +m1[1], d: +m1[2] };
@@ -707,12 +726,12 @@
     let m = s.match(/(\d+(?:\.\d+)?)\s*万\s*盾/) || s.match(/(\d+(?:\.\d+)?)\s*万\s*[Vv][Nn][Dd]/);
     if (m) {
       const vnd = Math.round(+m[1] * 10000);
-      return { text: m[0], original: vnd, currency: "VND", baseCents: Math.round(vnd * 0.0285) };
+      return { text: m[0], original: vnd, currency: "VND", baseCents: Math.round(vnd * vndRate() * 100) };
     }
     m = s.match(/(\d+(?:\.\d+)?)\s*盾/) || s.match(/(\d+(?:\.\d+)?)\s*[Vv][Nn][Dd]/);
     if (m) {
       const vnd = Math.round(+m[1]);
-      return { text: m[0], original: vnd, currency: "VND", baseCents: Math.round(vnd * 0.0285) };
+      return { text: m[0], original: vnd, currency: "VND", baseCents: Math.round(vnd * vndRate() * 100) };
     }
     m = s.match(/(\d+(?:\.\d{1,2})?)\s*万\s*(?:元|块|rmb|RMB)/);
     if (m) return { text: m[0], original: Math.round(+m[1] * 10000), currency: "CNY", baseCents: Math.round(+m[1] * 10000 * 100) };
@@ -968,9 +987,9 @@
               <span class="ledger-field-label">折合${escapeHtml(currencyByCode(baseCurrency).nameZh)}</span>
               <span class="ledger-converted-input-wrap">
                 <span class="ledger-converted-code">${escapeHtml(baseCurrency)}</span>
-                <input class="ledger-input" name="baseAmount" data-ledger-field="base-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="手动填写换算后的总金额" value="${escapeAttribute(editingBill && isForeign ? centsToInput(editingBill.baseAmountCents) : draft?.baseAmount || "")}" ${isForeign ? "required" : ""}>
+                <input class="ledger-input" name="baseAmount" data-ledger-field="base-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="自动换算，可手动改" value="${escapeAttribute(editingBill && isForeign ? centsToInput(editingBill.baseAmountCents) : draft?.baseAmount || "")}" ${isForeign ? "required" : ""}>
               </span>
-              <small class="ledger-field-help">按付款当时采用的汇率手动填写</small>
+              <small class="ledger-field-help">选越南盾时按 1盾=¥${escapeHtml(String(vndRate()))} 自动换算，可手动改</small>
             </label>
 
             <fieldset class="ledger-fieldset">
@@ -1708,6 +1727,7 @@
       convertedInput.required = isForeign;
       if (!isForeign) convertedInput.value = "";
     }
+    autoConvertBaseAmount(form);
     captureBillDraft();
     syncSplitSummary();
   }
@@ -1803,6 +1823,7 @@
   }
 
   async function submitBill(form) {
+    autoConvertBaseAmount(form);
     const formData = new FormData(form);
     const currency = String(formData.get("currency") || "").toUpperCase();
     const originalAmountCents = toCents(formData.get("originalAmount"));
@@ -2199,8 +2220,8 @@
         const participantIds = [...row.querySelectorAll("[data-parse-part]:checked")].map((c) => c.dataset.parsePart);
         if (!(amountVal > 0)) { skipped += 1; return; }
         const currency = dr.currency === "VND" ? "VND" : baseCurrency;
-        const originalAmountCents = currency === "VND" ? Math.round(amountVal) : Math.round(amountVal * 100);
-        const baseAmountCents = currency === "VND" ? Math.round(amountVal * 0.0285) : Math.round(amountVal * 100);
+        const originalAmountCents = Math.round(amountVal * 100);
+        const baseAmountCents = currency === "VND" ? Math.round(amountVal * vndRate() * 100) : Math.round(amountVal * 100);
         const bill = {
           id: makeId("bill"),
           originalAmountCents,
@@ -2335,6 +2356,9 @@
     const memberForm = event.target.closest('[data-ledger-form="member-add"]');
     if (memberForm) syncMemberPreview(memberForm);
     if (event.target.closest('[data-ledger-form="bill"]')) {
+      if (event.target.matches('[data-ledger-field="original-amount"]')) {
+        autoConvertBaseAmount(event.target.closest("form"));
+      }
       captureBillDraft();
       syncSplitSummary();
     }
