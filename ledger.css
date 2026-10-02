@@ -607,3 +607,9 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
 .ledger-scope-tabs { display: flex; gap: 6px; margin: 10px 0 12px; }
 .ledger-scope-tab { flex: 1; padding: 8px 4px; border: 1px solid #dbe0ec; border-radius: 10px; background: #fff; color: #5b6478; font-size: 13px; font-weight: 600; }
 .ledger-scope-tab.ledger-is-active { border-color: #0f766e; background: #e6f4f2; color: #0f766e; }
+
+/* 2026-09-29 每日花销一览：每人当天承担 */
+.ledger-day-perperson { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e5e8f0; }
+.ledger-day-perperson-label { font-size: 11.5px; color: #8590a8; width: 100%; }
+.ledger-day-person { display: inline-flex; align-items: center; gap: 4px; background: #f3f6fb; border-radius: 999px; padding: 3px 10px; font-size: 12.5px; color: #5b6478; }
+.ledger-day-person b { color: #1a1f36; font-size: 12.5px; }

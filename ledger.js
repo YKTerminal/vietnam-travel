@@ -1344,13 +1344,27 @@
           <ul class="ledger-day-bills">${rows}</ul>
         </div>`;
       }).join("");
+      const dayPerPerson = new Map();
+      dayBills.forEach((b) => {
+        for (const [id, cents] of billShares(b)) {
+          dayPerPerson.set(id, (dayPerPerson.get(id) || 0) + cents);
+        }
+      });
+      const perPersonRow = travelers.length ? `
+        <div class="ledger-day-perperson">
+          <span class="ledger-day-perperson-label">每人当天承担</span>
+          ${travelers.map((t) => {
+            const c = dayPerPerson.get(t.id) || 0;
+            return `<span class="ledger-day-person">${escapeHtml(t.name)} <b>${c ? escapeHtml(formatMoney(c, baseCurrency)) : "—"}</b></span>`;
+          }).join("")}
+        </div>` : "";
       return `<details class="ledger-day-group"${di === 0 ? " open" : ""}>
         <summary class="ledger-day-summary">
           <span class="ledger-day-date">${escapeHtml(day)}</span>
           <span class="ledger-day-meta">${dayBills.length} 笔</span>
           <b class="ledger-day-total">${escapeHtml(formatMoney(dayTotal, baseCurrency))}</b>
         </summary>
-        <div class="ledger-day-detail">${inner}</div>
+        <div class="ledger-day-detail">${inner}${perPersonRow}</div>
       </details>`;
     }).join("");
 
