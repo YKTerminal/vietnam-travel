@@ -438,7 +438,7 @@ function currencyWidgetHtml() {
       <button type="button" data-fx-quick="1000000">100万盾</button>
       <button type="button" data-fx-quick="5000000">500万盾</button>
     </div>
-    <div class="fx-rate-line">汇率 <button type="button" id="fx-rate-btn" title="点击修改汇率">1盾 = ¥0.000285</button>（默认参考值，到当地可按实际汇率点改）</div>
+    <div class="fx-rate-line">汇率 <button type="button" id="fx-rate-btn" title="点击修改汇率">1盾 = ¥0.00026</button>（2026-09-30 你胡志明实测：300万盾=¥779.7；汇率变化可点此修改）</div>
   </div>`;
 }
 
@@ -446,7 +446,7 @@ function bindCurrency() {
   const vnd = $("#fx-vnd"), cny = $("#fx-cny");
   if (!vnd || !cny) return;
   const rateBtn = $("#fx-rate-btn");
-  let rate = parseFloat(localStorage.getItem("vn-fx-rate") || "0.000285");
+  let rate = parseFloat(localStorage.getItem("vn-fx-rate") || "0.00026");
   const fmt = (n) => String(Math.round(n * 100) / 100);
   const syncBtn = () => { rateBtn.textContent = "1盾 = ¥" + rate; };
   syncBtn();

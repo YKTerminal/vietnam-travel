@@ -663,8 +663,8 @@
   function parsePad(n) { return String(n).padStart(2, "0"); }
 
   function vndRate() {
-    const v = parseFloat((typeof window !== "undefined" ? window.localStorage?.getItem("vn-fx-rate") : null) || "0.000285");
-    return v > 0 ? v : 0.000285;
+    const v = parseFloat((typeof window !== "undefined" ? window.localStorage?.getItem("vn-fx-rate") : null) || "0.00026");
+    return v > 0 ? v : 0.00026;
   }
 
   function autoConvertBaseAmount(form) {
