@@ -151,6 +151,16 @@
   let billCatFilter = "__all";
   let billMultiMode = false;
   let billSelectedIds = new Set();
+  let summaryScope = "local";
+
+  function isFlightHotelBill(bill) {
+    if (bill.category === "住宿") return true;
+    if (bill.category === "交通") {
+      const n = bill.note || "";
+      if (/✈️/.test(n) || /机票|航班/.test(n) || /[A-Z]{2}\s?\d{3,4}/.test(n)) return true;
+    }
+    return false;
+  }
   let editingMemberId = null;
   let editingNoteBillId = null;
   let pendingNoteSave = null;
@@ -1272,8 +1282,13 @@
 
   function renderSummaryPage() {
     const travelers = ledgerData.travelers;
-    const bills = ledgerData.bills;
+    const allBills = ledgerData.bills;
     const baseCurrency = ledgerData.settings.baseCurrency;
+    const bills = summaryScope === "all" ? allBills
+      : summaryScope === "fh" ? allBills.filter(isFlightHotelBill)
+      : allBills.filter((b) => !isFlightHotelBill(b));
+    const scopeLabel = summaryScope === "all" ? "全部花费"
+      : summaryScope === "fh" ? "机酒花费（不含当地消费）" : "当地消费（不含机票酒店）";
     const totalCents = bills.reduce((s, b) => s + b.baseAmountCents, 0);
     const days = new Set(bills.map((b) => String(b.orderedAt || "").slice(0, 10))).size;
 
@@ -1339,10 +1354,17 @@
       </details>`;
     }).join("");
 
+    const scopeBtn = (value, label) => `
+      <button type="button" class="ledger-scope-tab${summaryScope === value ? " ledger-is-active" : ""}" data-ledger-action="summary-scope" data-summary-scope="${value}">${label}</button>`;
     return `
       <section class="ledger-tab-panel ledger-summary-panel" data-ledger-panel="summary" role="tabpanel" aria-labelledby="ledger-summary-tab" ${activeTab === "summary" ? "" : "hidden"}>
+        <div class="ledger-scope-tabs" role="tablist" aria-label="统计视角">
+          ${scopeBtn("local", "🌴 当地消费")}
+          ${scopeBtn("fh", "✈️ 机酒")}
+          ${scopeBtn("all", "全部")}
+        </div>
         <section class="ledger-stats-overview" aria-labelledby="ledger-summary-title">
-          <p class="ledger-section-kicker">花费统计</p>
+          <p class="ledger-section-kicker">花费统计 · ${escapeHtml(scopeLabel)}</p>
           <h2 id="ledger-summary-title">${escapeHtml(formatMoney(totalCents, baseCurrency))}</h2>
           <span>${bills.length} 笔账单 · ${days} 天 · 以 ${escapeHtml(baseCurrency)} 结算</span>
         </section>
@@ -2152,6 +2174,9 @@
     if (action === "set-tab") {
       captureBillDraft();
       setActiveTab(button.dataset.ledgerTab);
+    } else if (action === "summary-scope") {
+      summaryScope = button.dataset.summaryScope || "local";
+      renderApp();
     } else if (action === "filter-bill-cat") {
       billCatFilter = button.dataset.ledgerCat || "__all";
       renderApp();
