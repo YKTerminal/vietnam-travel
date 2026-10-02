@@ -240,15 +240,16 @@
 
   function formatMoney(cents, currencyCode) {
     const amount = Number(cents || 0) / 100;
+    const zeroDecimals = ["VND", "JPY", "KRW"].includes(currencyCode);
     try {
       return new Intl.NumberFormat("zh-CN", {
         style: "currency",
         currency: currencyCode,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: zeroDecimals ? 0 : 2,
+        maximumFractionDigits: zeroDecimals ? 0 : 2
       }).format(amount);
     } catch {
-      return `${currencyCode} ${amount.toFixed(2)}`;
+      return `${currencyCode} ${amount.toFixed(zeroDecimals ? 0 : 2)}`;
     }
   }
 
@@ -1318,11 +1319,13 @@
     const catMark = { "餐饮": "🍜", "交通": "🚕", "住宿": "🏨", "门票": "🎫", "购物": "🛍️", "其他": "📦" };
     const dayHtml = dayEntries.map(([day, dayBills], di) => {
       const dayTotal = dayBills.reduce((s, b) => s + b.baseAmountCents, 0);
+      const dayVnd = dayBills.filter((b) => b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0);
       const catGroups = CATEGORIES
         .map((c) => ({ c, list: dayBills.filter((b) => b.category === c) }))
         .filter((g) => g.list.length);
       const inner = catGroups.map((g) => {
         const catTotal = g.list.reduce((s, b) => s + b.baseAmountCents, 0);
+        const catVnd = g.list.filter((b) => b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0);
         const rows = g.list.map((b) => {
           const payer = travelerById(b.payerId);
           const parts = b.participantIds.map(travelerById).filter(Boolean);
@@ -1340,7 +1343,7 @@
           </li>`;
         }).join("");
         return `<div class="ledger-day-cat">
-          <div class="ledger-day-cat-head"><span>${catMark[g.c] || ""} ${escapeHtml(g.c)}</span><b>${escapeHtml(formatMoney(catTotal, baseCurrency))}</b></div>
+          <div class="ledger-day-cat-head"><span>${catMark[g.c] || ""} ${escapeHtml(g.c)}</span><b>${escapeHtml(formatMoney(catTotal, baseCurrency))}${catVnd ? `<small class="ledger-day-vnd">${escapeHtml(formatMoney(catVnd, "VND"))}</small>` : ""}</b></div>
           <ul class="ledger-day-bills">${rows}</ul>
         </div>`;
       }).join("");
@@ -1362,7 +1365,7 @@
         <summary class="ledger-day-summary">
           <span class="ledger-day-date">${escapeHtml(day)}</span>
           <span class="ledger-day-meta">${dayBills.length} 笔</span>
-          <b class="ledger-day-total">${escapeHtml(formatMoney(dayTotal, baseCurrency))}</b>
+          <b class="ledger-day-total">${escapeHtml(formatMoney(dayTotal, baseCurrency))}${dayVnd ? `<small class="ledger-day-vnd">${escapeHtml(formatMoney(dayVnd, "VND"))}</small>` : ""}</b>
         </summary>
         <div class="ledger-day-detail">${inner}${perPersonRow}</div>
       </details>`;
@@ -1381,6 +1384,7 @@
           <p class="ledger-section-kicker">花费统计 · ${escapeHtml(scopeLabel)}</p>
           <h2 id="ledger-summary-title">${escapeHtml(formatMoney(totalCents, baseCurrency))}</h2>
           <span>${bills.length} 笔账单 · ${days} 天 · 以 ${escapeHtml(baseCurrency)} 结算</span>
+          ${bills.some((b) => b.currency === "VND") ? `<span>其中越南盾 ${escapeHtml(formatMoney(bills.filter((b) => b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0), "VND"))}</span>` : ""}
         </section>
 
         <section class="ledger-summary-section">
