@@ -532,11 +532,12 @@
     ].filter((code) => CURRENCY_BY_CODE.has(code)))];
   }
 
-  function billShares(bill) {
+  function billShares(bill, field = "baseAmountCents") {
     const participantIds = bill.participantIds.filter((id) => travelerById(id));
     if (!participantIds.length) return new Map();
-    const share = Math.floor(bill.baseAmountCents / participantIds.length);
-    let remainder = bill.baseAmountCents - share * participantIds.length;
+    const total = bill[field] || 0;
+    const share = Math.floor(total / participantIds.length);
+    let remainder = total - share * participantIds.length;
     return new Map(participantIds.map((id) => {
       const amount = share + (remainder > 0 ? 1 : 0);
       remainder -= remainder > 0 ? 1 : 0;
@@ -1296,15 +1297,16 @@
     const perPerson = travelers
       .map((t) => ({
         t,
-        paid: bills.filter((b) => b.payerId === t.id).reduce((s, b) => s + b.baseAmountCents, 0)
+        paid: bills.filter((b) => b.payerId === t.id).reduce((s, b) => s + b.baseAmountCents, 0),
+        paidVnd: bills.filter((b) => b.payerId === t.id && b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0)
       }))
       .sort((a, b) => b.paid - a.paid);
     const personHtml = travelers.length
-      ? perPerson.map(({ t, paid }) => `
+      ? perPerson.map(({ t, paid, paidVnd }) => `
         <div class="ledger-person-row">
           ${renderAvatar(t, "small")}
           <span>${escapeHtml(t.name)}</span>
-          <b>${escapeHtml(formatMoney(paid, baseCurrency))}</b>
+          <b>${escapeHtml(formatMoney(paid, baseCurrency))}${paidVnd ? `<small class="ledger-day-vnd">${escapeHtml(formatMoney(paidVnd, "VND"))}</small>` : ""}</b>
         </div>`).join("")
       : `<p class="ledger-empty">先在"记账"页添加同行人。</p>`;
 
@@ -1348,9 +1350,15 @@
         </div>`;
       }).join("");
       const dayPerPerson = new Map();
+      const dayPerPersonVnd = new Map();
       dayBills.forEach((b) => {
         for (const [id, cents] of billShares(b)) {
           dayPerPerson.set(id, (dayPerPerson.get(id) || 0) + cents);
+        }
+        if (b.currency === "VND") {
+          for (const [id, cents] of billShares(b, "originalAmountCents")) {
+            dayPerPersonVnd.set(id, (dayPerPersonVnd.get(id) || 0) + cents);
+          }
         }
       });
       const perPersonRow = travelers.length ? `
@@ -1358,7 +1366,8 @@
           <span class="ledger-day-perperson-label">每人当天承担</span>
           ${travelers.map((t) => {
             const c = dayPerPerson.get(t.id) || 0;
-            return `<span class="ledger-day-person">${escapeHtml(t.name)} <b>${c ? escapeHtml(formatMoney(c, baseCurrency)) : "—"}</b></span>`;
+            const v = dayPerPersonVnd.get(t.id) || 0;
+            return `<span class="ledger-day-person">${escapeHtml(t.name)} <b>${c ? escapeHtml(formatMoney(c, baseCurrency)) : "—"}${v ? `<small>${escapeHtml(formatMoney(v, "VND"))}</small>` : ""}</b></span>`;
           }).join("")}
         </div>` : "";
       return `<details class="ledger-day-group"${di === 0 ? " open" : ""}>
