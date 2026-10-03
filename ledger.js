@@ -1212,6 +1212,35 @@
     });
     const catMark = { "餐饮": "🍜", "交通": "🚕", "住宿": "🏨", "门票": "🎫", "购物": "🛍️", "其他": "📦" };
     const filtered = billCatFilter === "__all" ? bills : bills.filter((b) => b.category === billCatFilter);
+    const dayMap = new Map();
+    filtered.forEach((b) => {
+      const key = String(b.orderedAt || "").slice(0, 10) || "未标日期";
+      const list = dayMap.get(key) || [];
+      list.push(b);
+      dayMap.set(key, list);
+    });
+    const dayEntries = [...dayMap.entries()].sort((a, b) => {
+      if (a[0] === "未标日期") return 1;
+      if (b[0] === "未标日期") return -1;
+      return b[0].localeCompare(a[0]);
+    });
+    const dayLabel = (key) => {
+      const m = key.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return m ? `${+m[2]}月${+m[3]}日` : key;
+    };
+    const groupedHtml = dayEntries.map(([day, list]) => {
+      const dayTotal = list.reduce((s, b) => s + b.baseAmountCents, 0);
+      const dayVnd = list.filter((b) => b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0);
+      return `
+      <details class="ledger-bill-day" ${billMultiMode ? "open" : ""}>
+        <summary class="ledger-bill-day-summary">
+          <span class="ledger-bill-day-date">${escapeHtml(dayLabel(day))}</span>
+          <span class="ledger-bill-day-meta">${list.length} 笔</span>
+          <b class="ledger-bill-day-total">${escapeHtml(formatMoney(dayTotal, baseCurrency))}${dayVnd ? `<small class="ledger-day-vnd">${escapeHtml(formatMoney(dayVnd, "VND"))}</small>` : ""}</b>
+        </summary>
+        <div class="ledger-bill-day-list">${list.map(renderBillRow).join("")}</div>
+      </details>`;
+    }).join("");
     const countOf = (c) => bills.filter((b) => b.category === c).length;
     const tabBtn = (value, label, count) => `
       <button type="button" class="ledger-cat-tab${billCatFilter === value ? " ledger-is-active" : ""}" data-ledger-action="filter-bill-cat" data-ledger-cat="${escapeAttribute(value)}">${label}${count ? ` <small>${count}</small>` : ""}</button>`;
@@ -1238,7 +1267,7 @@
           </div>
           ${tabs}
           ${filtered.length
-            ? `<div class="ledger-bill-list">${filtered.map(renderBillRow).join("")}</div>`
+            ? `<div class="ledger-bill-list">${groupedHtml}</div>`
             : `<div class="ledger-empty-state"><p>该类别还没有账单。</p></div>`}
           ${billMultiMode ? `
           <div class="ledger-multi-bar" data-ledger-multi-bar>

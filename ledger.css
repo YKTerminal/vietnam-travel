@@ -624,3 +624,16 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
 .ledger-person-row b .ledger-day-vnd { font-size: 11px; font-weight: 600; }
 .ledger-day-person b { display: inline-flex; align-items: baseline; gap: 4px; }
 .ledger-day-person b small { font-size: 11px; color: #8590a8; }
+
+/* 2026-09-29 账单明细按天分组折叠 */
+.ledger-bill-day { border: 1px solid #e5e8f0; border-radius: 12px; margin-bottom: 8px; background: #fff; overflow: hidden; }
+.ledger-bill-day-summary { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; list-style: none; }
+.ledger-bill-day-summary::-webkit-details-marker { display: none; }
+.ledger-bill-day-date { font-weight: 700; font-size: 13.5px; color: #1a1f36; }
+.ledger-bill-day-meta { font-size: 11.5px; color: #8590a8; }
+.ledger-bill-day-total { margin-left: auto; font-size: 13.5px; color: #1a1f36; text-align: right; }
+.ledger-bill-day-total .ledger-day-vnd { font-weight: 600; }
+.ledger-bill-day[open] .ledger-bill-day-summary { border-bottom: 1px solid #eef1f7; }
+.ledger-bill-day-list { padding: 6px; }
+.ledger-bill-day-list .ledger-bill-row { border: none; border-radius: 10px; margin-bottom: 2px; }
+.ledger-bill-day-list .ledger-bill-row:not(:last-child) { border-bottom: 1px dashed #eef1f7; }
