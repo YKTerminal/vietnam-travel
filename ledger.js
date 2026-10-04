@@ -7,7 +7,8 @@
     commonCurrencies: ["EUR", "CHF", "HKD"],
     lastCurrency: "CNY",
     couples: [],
-    settlements: {}
+    settlements: {},
+    settleMode: "person"
   });
   const CATEGORIES = Object.freeze(["餐饮", "交通", "住宿", "门票", "购物", "其他"]);
   const AVATAR_COLORS = Object.freeze([
@@ -346,7 +347,8 @@
         commonCurrencies,
         lastCurrency,
         couples: normalizeCouples(raw.settings?.couples, travelers),
-        settlements: (raw.settings?.settlements && typeof raw.settings.settlements === "object") ? raw.settings.settlements : {}
+        settlements: (raw.settings?.settlements && typeof raw.settings.settlements === "object") ? raw.settings.settlements : {},
+        settleMode: raw.settings?.settleMode === "couple" ? "couple" : "person"
       },
       travelers,
       bills,
@@ -605,6 +607,48 @@
       return s + part;
     }, 0);
     return paid - owed;
+  }
+
+  function personNetFor(dayBills, traveler) {
+    const paid = dayBills.filter((b) => b.payerId === traveler.id).reduce((s, b) => s + b.baseAmountCents, 0);
+    const owed = dayBills.reduce((s, b) => s + (billShares(b).get(traveler.id) || 0), 0);
+    return paid - owed;
+  }
+
+  function settleTransfersFor(netById) {
+    const debts = [];
+    const credits = [];
+    for (const [id, net] of netById) {
+      if (net < -1) debts.push({ id, amount: -net });
+      else if (net > 1) credits.push({ id, amount: net });
+    }
+    debts.sort((a, b) => b.amount - a.amount);
+    credits.sort((a, b) => b.amount - a.amount);
+    const out = [];
+    let i = 0;
+    let j = 0;
+    while (i < debts.length && j < credits.length) {
+      const pay = Math.min(debts[i].amount, credits[j].amount);
+      out.push({ fromId: debts[i].id, toId: credits[j].id, amountCents: pay });
+      debts[i].amount -= pay;
+      credits[j].amount -= pay;
+      if (debts[i].amount <= 1) i += 1;
+      if (credits[j].amount <= 1) j += 1;
+    }
+    return out;
+  }
+
+  function vndOf(cents) {
+    const rate = parseFloat(localStorage.getItem("vn-fx-rate") || "0.00026");
+    if (!rate || rate <= 0) return null;
+    return Math.round(cents / 100 / rate);
+  }
+
+  function moneyWithVnd(cents, baseCurrency) {
+    const vnd = vndOf(cents);
+    return vnd !== null && vnd > 0
+      ? `${formatMoney(cents, baseCurrency)} <small class="ledger-day-vnd-inline">≈ ${formatMoney(vnd * 100, "VND")}</small>`
+      : formatMoney(cents, baseCurrency);
   }
 
   function calculateStats() {
@@ -1552,33 +1596,27 @@
     const pairs = couplePairs();
     const paired = pairs.length === 2;
     const allBills = ledgerData.bills;
+    const settleMode = ledgerData.settings.settleMode === "couple" ? "couple" : "person";
 
-    // ===== 情侣对总结算 =====
-    let coupleSummaryHtml = "";
-    if (paired) {
-      const [p1, p2] = pairs;
-      const net1 = coupleNetFor(allBills, p1);
-      const net2 = coupleNetFor(allBills, p2);
-      const abs = Math.abs(net1) || Math.abs(net2);
-      let direction = "";
-      if (abs === 0) direction = `<div class="ledger-couple-line ledger-neutral">两对花费已平，无需转账。</div>`;
-      else if (net1 > 0) direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p2))} 需转给 ${escapeHtml(coupleLabel(p1))} <b>${escapeHtml(formatMoney(net1, baseCurrency))}</b>（${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转一次即可）</div>`;
-      else direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p1))} 需转给 ${escapeHtml(coupleLabel(p2))} <b>${escapeHtml(formatMoney(net2, baseCurrency))}</b>（${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转一次即可）</div>`;
-      coupleSummaryHtml = `
-        <section class="ledger-settlement-section" aria-labelledby="ledger-couple-title">
-          <div class="ledger-section-heading">
-            <div>
-              <p class="ledger-section-kicker">结算方案 · 按情侣对</p>
-              <h2 id="ledger-couple-title">谁转给谁（只需一笔）</h2>
-            </div>
-            <span class="ledger-soft-count">👫 ${escapeHtml(coupleLabel(p1))} ｜ ${escapeHtml(coupleLabel(p2))}</span>
+    // ===== 结算方式选择器 =====
+    const modeSwitch = `
+      <section class="ledger-settlement-section ledger-mode-switch-section">
+        <div class="ledger-section-heading">
+          <div>
+            <p class="ledger-section-kicker">结算方式</p>
+            <h2>按什么方式结算</h2>
           </div>
-          ${direction}
-          <p class="ledger-couple-note">情侣内部的钱不分开算，两对之间只需代表互相转一笔。</p>
-        </section>`;
-    }
+        </div>
+        <div class="ledger-mode-switch" role="tablist" aria-label="结算方式">
+          <button type="button" class="${settleMode === "person" ? "ledger-is-active" : ""}" data-ledger-action="set-settle-mode" data-mode="person">👥 按人头</button>
+          <button type="button" class="${settleMode === "couple" ? "ledger-is-active" : ""}" data-ledger-action="set-settle-mode" data-mode="couple">👫 按情侣对</button>
+        </div>
+        <p class="ledger-couple-note">${settleMode === "couple"
+          ? (paired ? `当前配对：${ledgerData.settings.couples.map((pair) => escapeHtml(coupleLabel(pair))).join(" ｜ ")}（可点下方「设置配对」修改）` : "还没设置情侣对，点下方「设置配对」。")
+          : "每人单独结算：谁垫付了、谁该分摊，多退少补。"}</p>
+      </section>`;
 
-    // ===== 每日结清清单 =====
+    // ===== 每日结清清单（按当前模式） =====
     const dayMap = new Map();
     allBills.forEach((b) => {
       const key = String(b.orderedAt || "").slice(0, 10) || "未标日期";
@@ -1591,24 +1629,40 @@
       const m = key.match(/^(\d{4})-(\d{2})-(\d{2})$/);
       return m ? `${+m[2]}月${+m[3]}日` : key;
     };
+    const statusHtmlFor = (day) => {
+      const settled = Boolean(ledgerData.settings.settlements?.[day]);
+      return settled
+        ? `<span class="ledger-settled-badge">已结清 ✓</span><button type="button" class="ledger-text-button ledger-danger-button" data-ledger-action="unmark-day-settled" data-day="${escapeAttribute(day)}">撤销</button>`
+        : `<button type="button" class="ledger-secondary-button ledger-settle-btn" data-ledger-action="mark-day-settled" data-day="${escapeAttribute(day)}">✓ 标记已结清</button>`;
+    };
     let dailySettleHtml = "";
-    if (paired && allBills.length) {
-      const [p1, p2] = pairs;
+    if (allBills.length) {
       const rows = dayEntries.map(([day, dayBills]) => {
-        const net1 = coupleNetFor(dayBills, p1);
-        const settled = Boolean(ledgerData.settings.settlements?.[day]);
-        let line;
-        if (net1 === 0) line = `<span class="ledger-day-settle-amt ledger-neutral">两对已平，无需互转</span>`;
-        else if (net1 > 0) line = `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转 <b>${escapeHtml(formatMoney(net1, baseCurrency))}</b></span>`;
-        else line = `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转 <b>${escapeHtml(formatMoney(-net1, baseCurrency))}</b></span>`;
-        const statusHtml = settled
-          ? `<span class="ledger-settled-badge">已结清 ✓</span><button type="button" class="ledger-text-button ledger-danger-button" data-ledger-action="unmark-day-settled" data-day="${escapeAttribute(day)}">撤销</button>`
-          : `<button type="button" class="ledger-secondary-button ledger-settle-btn" data-ledger-action="mark-day-settled" data-day="${escapeAttribute(day)}">✓ 标记已结清</button>`;
+        let lines;
+        if (settleMode === "couple" && paired) {
+          const [p1, p2] = pairs;
+          const net1 = coupleNetFor(dayBills, p1);
+          lines = net1 === 0
+            ? `<span class="ledger-day-settle-amt ledger-neutral">两对已平，无需互转</span>`
+            : net1 > 0
+              ? `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转 ${moneyWithVnd(net1, baseCurrency)}</span>`
+              : `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转 ${moneyWithVnd(-net1, baseCurrency)}</span>`;
+        } else {
+          const netById = new Map();
+          ledgerData.travelers.forEach((t) => {
+            const net = personNetFor(dayBills, t);
+            if (net !== 0) netById.set(t.id, net);
+          });
+          const transfers = settleTransfersFor(netById);
+          lines = transfers.length
+            ? transfers.map((tr) => `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(tr.fromId).name)} → ${escapeHtml(travelerById(tr.toId).name)} 转 ${moneyWithVnd(tr.amountCents, baseCurrency)}</span>`).join("")
+            : `<span class="ledger-day-settle-amt ledger-neutral">已平，无需互转</span>`;
+        }
         return `
           <div class="ledger-day-settle-row">
             <span class="ledger-day-settle-date">${escapeHtml(dayLabel(day))} <small>${dayBills.length} 笔</small></span>
-            <div class="ledger-day-settle-main">${line}</div>
-            <div class="ledger-day-settle-status">${statusHtml}</div>
+            <div class="ledger-day-settle-main">${lines}</div>
+            <div class="ledger-day-settle-status">${statusHtmlFor(day)}</div>
           </div>`;
       }).join("");
       dailySettleHtml = `
@@ -1624,8 +1678,10 @@
         </section>`;
     }
 
-    // ===== 情侣对设置入口 =====
-    const coupleSetupHtml = `
+    // ===== 总结算区块（按当前模式） =====
+    let summaryHtml = "";
+    if (settleMode === "couple") {
+      const setupHtml = `
       <section class="ledger-settlement-section ledger-couple-setup">
         <div class="ledger-section-heading">
           <div>
@@ -1638,19 +1694,31 @@
           ? `<p class="ledger-couple-note">当前：${ledgerData.settings.couples.map((pair) => escapeHtml(coupleLabel(pair))).join(" ｜ ")}（结算按对合并）</p>`
           : `<p class="ledger-couple-note">还没设置情侣对。设置后结算会按对合并，两对之间只转一笔。</p>`}
       </section>`;
-
-    return `
-      <section class="ledger-tab-panel" data-ledger-panel="stats" role="tabpanel" aria-labelledby="ledger-stats-tab" ${activeTab === "stats" ? "" : "hidden"}>
-        <section class="ledger-stats-overview" aria-labelledby="ledger-stats-title">
-          <p class="ledger-section-kicker">账单结算</p>
-          <h2 id="ledger-stats-title">${escapeHtml(formatMoney(stats.totalCents, baseCurrency))}</h2>
-          <span>${ledgerData.bills.length} 笔账单 · 以 ${escapeHtml(baseCurrency)} 结算</span>
-        </section>
-
-        ${coupleSetupHtml}
-        ${coupleSummaryHtml}
-        ${dailySettleHtml}
-
+      let coupleSummaryHtml = "";
+      if (paired) {
+        const [p1, p2] = pairs;
+        const net1 = coupleNetFor(allBills, p1);
+        const abs = Math.abs(net1);
+        let direction = "";
+        if (abs === 0) direction = `<div class="ledger-couple-line ledger-neutral">两对花费已平，无需转账。</div>`;
+        else if (net1 > 0) direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p2))} 需转给 ${escapeHtml(coupleLabel(p1))} ${moneyWithVnd(net1, baseCurrency)}（${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转一次即可）</div>`;
+        else direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p1))} 需转给 ${escapeHtml(coupleLabel(p2))} ${moneyWithVnd(-net1, baseCurrency)}（${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转一次即可）</div>`;
+        coupleSummaryHtml = `
+        <section class="ledger-settlement-section" aria-labelledby="ledger-couple-title">
+          <div class="ledger-section-heading">
+            <div>
+              <p class="ledger-section-kicker">结算方案 · 按情侣对</p>
+              <h2 id="ledger-couple-title">谁转给谁（只需一笔）</h2>
+            </div>
+            <span class="ledger-soft-count">👫 ${escapeHtml(coupleLabel(p1))} ｜ ${escapeHtml(coupleLabel(p2))}</span>
+          </div>
+          ${direction}
+          <p class="ledger-couple-note">情侣内部的钱不分开算，两对之间只需代表互相转一笔。</p>
+        </section>`;
+      }
+      summaryHtml = setupHtml + coupleSummaryHtml;
+    } else {
+      summaryHtml = `
         <section class="ledger-settlement-section" aria-labelledby="ledger-settlement-title">
           <div class="ledger-section-heading">
             <div>
@@ -1670,12 +1738,25 @@
                       ${renderAvatar(from)}
                       <span><strong>${escapeHtml(from?.name || "")}</strong><small>转给 ${escapeHtml(to?.name || "")}</small></span>
                     </div>
-                    <strong class="ledger-transfer-amount">${escapeHtml(formatMoney(transfer.amountCents, baseCurrency))}</strong>
+                    <strong class="ledger-transfer-amount">${moneyWithVnd(transfer.amountCents, baseCurrency)}</strong>
                   </div>`;
               }).join("")}
             </div>` : `
             <div class="ledger-empty-state"><p>${ledgerData.bills.length ? "大家已经结清，无需转账。" : "添加账单后，这里会自动生成结算单。"}</p></div>`}
+        </section>`;
+    }
+
+    return `
+      <section class="ledger-tab-panel" data-ledger-panel="stats" role="tabpanel" aria-labelledby="ledger-stats-tab" ${activeTab === "stats" ? "" : "hidden"}>
+        <section class="ledger-stats-overview" aria-labelledby="ledger-stats-title">
+          <p class="ledger-section-kicker">账单结算</p>
+          <h2 id="ledger-stats-title">${escapeHtml(formatMoney(stats.totalCents, baseCurrency))}</h2>
+          <span>${ledgerData.bills.length} 笔账单 · 以 ${escapeHtml(baseCurrency)} 结算</span>
         </section>
+
+        ${modeSwitch}
+        ${summaryHtml}
+        ${dailySettleHtml}
 
         <section class="ledger-member-stats-section" aria-labelledby="ledger-member-stats-title">
           <div class="ledger-section-heading">
@@ -1694,9 +1775,9 @@
                   </summary>
                   <div class="ledger-member-stat-body">
                     <dl class="ledger-member-metrics">
-                      <div><dt>实际支付</dt><dd>${escapeHtml(formatMoney(member.paidCents, baseCurrency))}</dd></div>
-                      <div><dt>个人应分摊</dt><dd>${escapeHtml(formatMoney(member.owedCents, baseCurrency))}</dd></div>
-                      <div><dt>结算结果</dt><dd class="${member.netCents > 0 ? "ledger-positive" : member.netCents < 0 ? "ledger-negative" : "ledger-neutral"}">${member.netCents > 0 ? "应收 " : member.netCents < 0 ? "应付 " : "已结清 "}${member.netCents === 0 ? "" : escapeHtml(formatMoney(Math.abs(member.netCents), baseCurrency))}</dd></div>
+                      <div><dt>实际支付</dt><dd>${moneyWithVnd(member.paidCents, baseCurrency)}</dd></div>
+                      <div><dt>个人应分摊</dt><dd>${moneyWithVnd(member.owedCents, baseCurrency)}</dd></div>
+                      <div><dt>结算结果</dt><dd class="${member.netCents > 0 ? "ledger-positive" : member.netCents < 0 ? "ledger-negative" : "ledger-neutral"}">${member.netCents > 0 ? "应收 " : member.netCents < 0 ? "应付 " : "已结清 "}${member.netCents === 0 ? "" : moneyWithVnd(Math.abs(member.netCents), baseCurrency)}</dd></div>
                     </dl>
                     <div class="ledger-member-bills">${renderRelatedBills(member)}</div>
                   </div>
@@ -2568,6 +2649,11 @@
     } else if (action === "open-members") {
       captureBillDraft();
       showDialog("members");
+    } else if (action === "set-settle-mode") {
+      const mode = button.dataset.mode === "couple" ? "couple" : "person";
+      mutateData((next) => {
+        next.settings.settleMode = mode;
+      }, { reason: "settle-mode", message: `结算方式已切换为「${mode === "couple" ? "按情侣对" : "按人头"}」。` });
     } else if (action === "open-couples") {
       showDialog("couples");
     } else if (action === "mark-day-settled") {
