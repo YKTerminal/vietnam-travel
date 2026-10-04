@@ -637,3 +637,25 @@ body[data-active-view="ledger"] .topbar { background: rgba(250, 251, 249, .93); 
 .ledger-bill-day-list { padding: 6px; }
 .ledger-bill-day-list .ledger-bill-row { border: none; border-radius: 10px; margin-bottom: 2px; }
 .ledger-bill-day-list .ledger-bill-row:not(:last-child) { border-bottom: 1px dashed #eef1f7; }
+
+/* 2026-09-29 情侣对结算 + 每日结清 + 个人页签 */
+.ledger-couple-setup { background: #f8fafc; }
+.ledger-couple-line { font-size: 14px; color: #1a1f36; line-height: 1.6; padding: 8px 0; }
+.ledger-couple-line b { color: #0f766e; font-size: 16px; }
+.ledger-couple-line.ledger-neutral { color: #8590a8; }
+.ledger-couple-note { font-size: 12px; color: #8590a8; margin: 6px 0 0; line-height: 1.6; }
+.ledger-day-settle-list { display: flex; flex-direction: column; gap: 6px; }
+.ledger-day-settle-row { display: flex; align-items: center; gap: 8px; border: 1px solid #e5e8f0; border-radius: 10px; padding: 8px 10px; background: #fff; flex-wrap: wrap; }
+.ledger-day-settle-date { font-weight: 700; font-size: 13px; color: #1a1f36; min-width: 72px; }
+.ledger-day-settle-date small { display: block; font-weight: 400; color: #8590a8; font-size: 10.5px; }
+.ledger-day-settle-main { flex: 1; min-width: 150px; font-size: 13px; }
+.ledger-day-settle-amt b { color: #0f766e; }
+.ledger-day-settle-amt.ledger-neutral { color: #8590a8; }
+.ledger-day-settle-status { display: flex; align-items: center; gap: 6px; }
+.ledger-settled-badge { background: #e6f4ea; color: #2e7d32; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
+.ledger-settle-btn { font-size: 12.5px; padding: 6px 12px; }
+.ledger-couples-form { display: flex; flex-direction: column; gap: 8px; }
+.ledger-couple-row { display: flex; align-items: center; gap: 10px; }
+.ledger-couple-name { flex: 1; font-weight: 600; color: #1a1f36; }
+.ledger-couple-row select { border: 1px solid #dbe0ec; border-radius: 8px; padding: 7px 10px; font-size: 13.5px; background: #fff; color: #1a1f36; }
+.ledger-couples-form .ledger-primary-button { margin-top: 4px; }

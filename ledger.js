@@ -5,7 +5,9 @@
   const DEFAULT_SETTINGS = Object.freeze({
     baseCurrency: "CNY",
     commonCurrencies: ["EUR", "CHF", "HKD"],
-    lastCurrency: "CNY"
+    lastCurrency: "CNY",
+    couples: [],
+    settlements: {}
   });
   const CATEGORIES = Object.freeze(["餐饮", "交通", "住宿", "门票", "购物", "其他"]);
   const AVATAR_COLORS = Object.freeze([
@@ -263,6 +265,28 @@
     };
   }
 
+  function normalizeCouples(rawCouples, travelers) {
+    const ids = new Set(travelers.map((t) => t.id));
+    const pairs = [];
+    const seen = new Set();
+    if (Array.isArray(rawCouples)) {
+      for (const raw of rawCouples) {
+        const pair = (Array.isArray(raw) ? raw : []).map(String).filter((id) => ids.has(id) && !seen.has(id));
+        if (pair.length === 2) {
+          seen.add(pair[0]);
+          seen.add(pair[1]);
+          pairs.push(pair);
+        }
+      }
+    }
+    // 4 人且未配置时，默认按加入顺序两两配对（可在结算页修改）
+    if (!pairs.length && travelers.length === 4) {
+      pairs.push([travelers[0].id, travelers[1].id]);
+      pairs.push([travelers[2].id, travelers[3].id]);
+    }
+    return pairs;
+  }
+
   function normalizeData(raw) {
     const fallback = defaultData();
     if (!raw || typeof raw !== "object") return fallback;
@@ -317,7 +341,13 @@
     });
     return {
       version: STORAGE_VERSION,
-      settings: { baseCurrency, commonCurrencies, lastCurrency },
+      settings: {
+        baseCurrency,
+        commonCurrencies,
+        lastCurrency,
+        couples: normalizeCouples(raw.settings?.couples, travelers),
+        settlements: (raw.settings?.settlements && typeof raw.settings.settlements === "object") ? raw.settings.settlements : {}
+      },
       travelers,
       bills,
       updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : fallback.updatedAt
@@ -545,6 +575,38 @@
     }));
   }
 
+  function coupleOf(id) {
+    for (const pair of ledgerData.settings.couples) {
+      if (pair.includes(id)) return pair;
+    }
+    return null;
+  }
+
+  function couplePairs() {
+    return ledgerData.settings.couples
+      .map((pair) => pair.filter((id) => travelerById(id)))
+      .filter((pair) => pair.length === 2);
+  }
+
+  function coupleLabel(pair) {
+    return pair.map((id) => (travelerById(id) || { name: id }).name).join("&");
+  }
+
+  function isPersonalBill(bill) {
+    return (bill.participantIds || []).length === 1 && bill.participantIds[0] === bill.payerId;
+  }
+
+  function coupleNetFor(bills, pair) {
+    const paid = bills.filter((b) => pair.includes(b.payerId)).reduce((s, b) => s + b.baseAmountCents, 0);
+    const owed = bills.reduce((s, b) => {
+      const shares = billShares(b);
+      let part = 0;
+      for (const id of pair) part += shares.get(id) || 0;
+      return s + part;
+    }, 0);
+    return paid - owed;
+  }
+
   function calculateStats() {
     const members = ledgerData.travelers.map((traveler) => ({
       traveler,
@@ -701,12 +763,7 @@
     const m2 = s.match(/(\d{1,2})\s*[号日]/);
     if (m2) {
       const day = +m2[1];
-      const now = new Date();
-      let y = now.getFullYear();
-      let mo = now.getMonth() + 1;
-      const cand = new Date(y, mo - 1, day);
-      if (cand < new Date(y, now.getMonth(), now.getDate())) { mo += 1; if (mo > 12) { mo = 1; y += 1; } }
-      return { y, m: mo, d: day };
+      return { y: 2026, m: 10, d: day };
     }
     return null;
   }
@@ -822,16 +879,14 @@
       currency: amt ? amt.currency : "CNY",
       amountText: amountStr,
       payerId: travelers.length ? travelers[0].id : "",
-      participantIds: [...participantIds]
+      participantIds: [...participantIds],
+      text: s
     });
 
     // 日期字符串
     let dateBase = "";
     if (dInfo) dateBase = `${dInfo.y}-${parsePad(dInfo.m)}`;
-    else {
-      const now = new Date();
-      dateBase = `${now.getFullYear()}-${parsePad(now.getMonth() + 1)}`;
-    }
+    else dateBase = "2026-10";
 
     // 酒店：连住多晚按晚拆开，每晚一笔
     if (isHotel && dInfo) {
@@ -862,21 +917,36 @@
   }
 
   function applySelfSplit(drafts, fullText, travelers) {
-    if (!/各自|各买|各付|各订|各人|自己买|自己订|自己付|分开买|分开订|各自付/.test(fullText)) return drafts;
     const n = travelers.length;
-    if (n < 2) return drafts;
-    const perMatch = fullText.match(/每人\s*(\d+(?:\.\d{1,2})?)\s*(?:元|块|¥|￥|rmb|RMB)/i);
+    const SELF_SPLIT = /各自|各买各|各付各|各订|各人|分开买|分开订|各自付|各买|各付/;
+    const SELF_ONLY = /自己买|自己订|自己付|我自己买|我买的|给自己买/;
     const out = [];
     for (const dr of drafts) {
-      const per = perMatch ? +perMatch[1] : (dr.amountText ? Math.round((+dr.amountText / n) * 100) / 100 : null);
-      for (let i = 0; i < n; i++) {
+      const text = dr.text || "";
+      if (SELF_SPLIT.test(text)) {
+        if (n < 2) {
+          out.push(dr);
+          continue;
+        }
+        const perMatch = text.match(/每人\s*(\d+(?:\.\d{1,2})?)\s*(?:元|块|¥|￥|rmb|RMB)/i);
+        for (let i = 0; i < n; i++) {
+          const per = perMatch ? +perMatch[1] : (dr.amountText ? Math.round((+dr.amountText / n) * 100) / 100 : null);
+          out.push({
+            ...dr,
+            note: `${dr.note} · ${travelers[i].name}自己付`,
+            payerId: travelers[i].id,
+            participantIds: [travelers[i].id],
+            amountText: per !== null ? String(per) : ""
+          });
+        }
+      } else if (SELF_ONLY.test(text)) {
         out.push({
           ...dr,
-          note: `${dr.note} · ${travelers[i].name}自己付`,
-          payerId: travelers[i].id,
-          participantIds: [travelers[i].id],
-          amountText: per !== null ? String(per) : ""
+          payerId: travelers[0]?.id || dr.payerId,
+          participantIds: [travelers[0]?.id || dr.payerId]
         });
+      } else {
+        out.push(dr);
       }
     }
     return out;
@@ -937,6 +1007,38 @@
         <div class="ledger-parse-footer" data-parse-footer hidden>
           <button class="ledger-primary-button" type="button" data-ledger-action="parse-book-all">✅ 全部入账</button>
         </div>
+      </dialog>`;
+  }
+
+  function renderCouplesDialog() {
+    const travelers = ledgerData.travelers;
+    const couples = ledgerData.settings.couples;
+    const partnerOf = (id) => {
+      const pair = couples.find((p) => p.includes(id));
+      return pair ? pair.find((x) => x !== id) : "";
+    };
+    const rows = travelers.map((t) => {
+      const options = [`<option value="">不结对</option>`]
+        .concat(travelers.filter((o) => o.id !== t.id).map((o) => `<option value="${escapeAttribute(o.id)}"${partnerOf(t.id) === o.id ? " selected" : ""}>${escapeHtml(o.name)}</option>`))
+        .join("");
+      return `
+        <div class="ledger-couple-row">
+          ${renderAvatar(t, "small")}
+          <span class="ledger-couple-name">${escapeHtml(t.name)}</span>
+          <select name="partner-${escapeAttribute(t.id)}" data-ledger-couple-for="${escapeAttribute(t.id)}">${options}</select>
+        </div>`;
+    }).join("");
+    return `
+      <dialog class="ledger-dialog ledger-couples-dialog" data-ledger-dialog="couples">
+        <div class="ledger-dialog-header">
+          <div><p class="ledger-section-kicker">结算设置</p><h3>👫 谁和谁是一对</h3></div>
+          <button class="ledger-text-button" type="button" data-ledger-action="close-dialog">关闭</button>
+        </div>
+        <form data-ledger-form="couples" class="ledger-couples-form">
+          <p class="ledger-parse-hint">互相选对方即结成一对。结算时情侣内部不分开算，两对之间只由代表转一笔。</p>
+          ${rows}
+          <button class="ledger-primary-button" type="submit">保存配对</button>
+        </form>
       </dialog>`;
   }
 
@@ -1211,7 +1313,9 @@
       return secondDate.localeCompare(firstDate);
     });
     const catMark = { "餐饮": "🍜", "交通": "🚕", "住宿": "🏨", "门票": "🎫", "购物": "🛍️", "其他": "📦" };
-    const filtered = billCatFilter === "__all" ? bills : bills.filter((b) => b.category === billCatFilter);
+    const filtered = billCatFilter === "__all" ? bills
+      : billCatFilter === "__personal" ? bills.filter(isPersonalBill)
+      : bills.filter((b) => b.category === billCatFilter);
     const dayMap = new Map();
     filtered.forEach((b) => {
       const key = String(b.orderedAt || "").slice(0, 10) || "未标日期";
@@ -1242,11 +1346,13 @@
       </details>`;
     }).join("");
     const countOf = (c) => bills.filter((b) => b.category === c).length;
+    const personalCount = bills.filter(isPersonalBill).length;
     const tabBtn = (value, label, count) => `
       <button type="button" class="ledger-cat-tab${billCatFilter === value ? " ledger-is-active" : ""}" data-ledger-action="filter-bill-cat" data-ledger-cat="${escapeAttribute(value)}">${label}${count ? ` <small>${count}</small>` : ""}</button>`;
     const tabs = `
       <div class="ledger-cat-tabs" role="tablist" aria-label="按类别筛选账单">
         ${tabBtn("__all", "全部", bills.length)}
+        ${tabBtn("__personal", "🧍 个人单独", personalCount)}
         ${CATEGORIES.map((c) => tabBtn(c, `${catMark[c] || ""} ${escapeHtml(c)}`, countOf(c))).join("")}
       </div>`;
     return `
@@ -1443,6 +1549,96 @@
   function renderStatsPage() {
     const stats = calculateStats();
     const baseCurrency = ledgerData.settings.baseCurrency;
+    const pairs = couplePairs();
+    const paired = pairs.length === 2;
+    const allBills = ledgerData.bills;
+
+    // ===== 情侣对总结算 =====
+    let coupleSummaryHtml = "";
+    if (paired) {
+      const [p1, p2] = pairs;
+      const net1 = coupleNetFor(allBills, p1);
+      const net2 = coupleNetFor(allBills, p2);
+      const abs = Math.abs(net1) || Math.abs(net2);
+      let direction = "";
+      if (abs === 0) direction = `<div class="ledger-couple-line ledger-neutral">两对花费已平，无需转账。</div>`;
+      else if (net1 > 0) direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p2))} 需转给 ${escapeHtml(coupleLabel(p1))} <b>${escapeHtml(formatMoney(net1, baseCurrency))}</b>（${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转一次即可）</div>`;
+      else direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p1))} 需转给 ${escapeHtml(coupleLabel(p2))} <b>${escapeHtml(formatMoney(net2, baseCurrency))}</b>（${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转一次即可）</div>`;
+      coupleSummaryHtml = `
+        <section class="ledger-settlement-section" aria-labelledby="ledger-couple-title">
+          <div class="ledger-section-heading">
+            <div>
+              <p class="ledger-section-kicker">结算方案 · 按情侣对</p>
+              <h2 id="ledger-couple-title">谁转给谁（只需一笔）</h2>
+            </div>
+            <span class="ledger-soft-count">👫 ${escapeHtml(coupleLabel(p1))} ｜ ${escapeHtml(coupleLabel(p2))}</span>
+          </div>
+          ${direction}
+          <p class="ledger-couple-note">情侣内部的钱不分开算，两对之间只需代表互相转一笔。</p>
+        </section>`;
+    }
+
+    // ===== 每日结清清单 =====
+    const dayMap = new Map();
+    allBills.forEach((b) => {
+      const key = String(b.orderedAt || "").slice(0, 10) || "未标日期";
+      const list = dayMap.get(key) || [];
+      list.push(b);
+      dayMap.set(key, list);
+    });
+    const dayEntries = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+    const dayLabel = (key) => {
+      const m = key.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return m ? `${+m[2]}月${+m[3]}日` : key;
+    };
+    let dailySettleHtml = "";
+    if (paired && allBills.length) {
+      const [p1, p2] = pairs;
+      const rows = dayEntries.map(([day, dayBills]) => {
+        const net1 = coupleNetFor(dayBills, p1);
+        const settled = Boolean(ledgerData.settings.settlements?.[day]);
+        let line;
+        if (net1 === 0) line = `<span class="ledger-day-settle-amt ledger-neutral">两对已平，无需互转</span>`;
+        else if (net1 > 0) line = `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转 <b>${escapeHtml(formatMoney(net1, baseCurrency))}</b></span>`;
+        else line = `<span class="ledger-day-settle-amt">${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转 <b>${escapeHtml(formatMoney(-net1, baseCurrency))}</b></span>`;
+        const statusHtml = settled
+          ? `<span class="ledger-settled-badge">已结清 ✓</span><button type="button" class="ledger-text-button ledger-danger-button" data-ledger-action="unmark-day-settled" data-day="${escapeAttribute(day)}">撤销</button>`
+          : `<button type="button" class="ledger-secondary-button ledger-settle-btn" data-ledger-action="mark-day-settled" data-day="${escapeAttribute(day)}">✓ 标记已结清</button>`;
+        return `
+          <div class="ledger-day-settle-row">
+            <span class="ledger-day-settle-date">${escapeHtml(dayLabel(day))} <small>${dayBills.length} 笔</small></span>
+            <div class="ledger-day-settle-main">${line}</div>
+            <div class="ledger-day-settle-status">${statusHtml}</div>
+          </div>`;
+      }).join("");
+      dailySettleHtml = `
+        <section class="ledger-settlement-section" aria-labelledby="ledger-daily-settle-title">
+          <div class="ledger-section-heading">
+            <div>
+              <p class="ledger-section-kicker">每天结清</p>
+              <h2 id="ledger-daily-settle-title">每日该转多少 · 是否已结</h2>
+            </div>
+          </div>
+          <div class="ledger-day-settle-list">${rows}</div>
+          <p class="ledger-couple-note">转完当天就点「标记已结清」，避免漏结；点「撤销」可取消。</p>
+        </section>`;
+    }
+
+    // ===== 情侣对设置入口 =====
+    const coupleSetupHtml = `
+      <section class="ledger-settlement-section ledger-couple-setup">
+        <div class="ledger-section-heading">
+          <div>
+            <p class="ledger-section-kicker">情侣对</p>
+            <h2>谁和谁是一对</h2>
+          </div>
+          <button type="button" class="ledger-secondary-button" data-ledger-action="open-couples">设置配对</button>
+        </div>
+        ${paired
+          ? `<p class="ledger-couple-note">当前：${ledgerData.settings.couples.map((pair) => escapeHtml(coupleLabel(pair))).join(" ｜ ")}（结算按对合并）</p>`
+          : `<p class="ledger-couple-note">还没设置情侣对。设置后结算会按对合并，两对之间只转一笔。</p>`}
+      </section>`;
+
     return `
       <section class="ledger-tab-panel" data-ledger-panel="stats" role="tabpanel" aria-labelledby="ledger-stats-tab" ${activeTab === "stats" ? "" : "hidden"}>
         <section class="ledger-stats-overview" aria-labelledby="ledger-stats-title">
@@ -1451,10 +1647,14 @@
           <span>${ledgerData.bills.length} 笔账单 · 以 ${escapeHtml(baseCurrency)} 结算</span>
         </section>
 
+        ${coupleSetupHtml}
+        ${coupleSummaryHtml}
+        ${dailySettleHtml}
+
         <section class="ledger-settlement-section" aria-labelledby="ledger-settlement-title">
           <div class="ledger-section-heading">
             <div>
-              <p class="ledger-section-kicker">结算方案</p>
+              <p class="ledger-section-kicker">结算方案 · 按人头</p>
               <h2 id="ledger-settlement-title">谁需要转给谁</h2>
             </div>
             <span class="ledger-soft-count">${stats.transfers.length} 笔转账</span>
@@ -1687,6 +1887,7 @@
         ${renderSummaryPage()}
         ${renderMembersDialog()}
         ${renderParseDialog()}
+        ${renderCouplesDialog()}
         ${renderSettingsDialog()}
         ${renderCurrencyDialog()}
       </div>`;
@@ -2087,6 +2288,36 @@
     }, { reason: "member-updated", message: "同行人信息已更新", afterSuccess() { editingMemberId = null; } });
   }
 
+  async function submitCouples(form) {
+    const travelers = ledgerData.travelers;
+    const partnerOf = {};
+    for (const t of travelers) {
+      const sel = form.querySelector(`select[data-ledger-couple-for="${CSS.escape(t.id)}"]`);
+      const v = sel?.value || "";
+      if (v && travelerById(v)) partnerOf[t.id] = v;
+    }
+    const pairs = [];
+    const used = new Set();
+    for (const t of travelers) {
+      const p = partnerOf[t.id];
+      if (!p || used.has(t.id) || used.has(p)) continue;
+      if (partnerOf[p] === t.id) {
+        used.add(t.id);
+        used.add(p);
+        pairs.push([t.id, p]);
+      }
+    }
+    openDialogName = "couples";
+    await mutateData((next) => {
+      next.settings.couples = pairs;
+    }, {
+      reason: "couples-updated",
+      message: pairs.length
+        ? `已设置 ${pairs.length} 对情侣：${pairs.map((pair) => pair.map(travelerById).map((x) => x.name).join("&")).join("、")}`
+        : "已清空情侣对设置。"
+    });
+  }
+
   function confirmLedgerAction(message) {
     return new Promise((resolve) => {
       const dialog = document.createElement("dialog");
@@ -2337,6 +2568,22 @@
     } else if (action === "open-members") {
       captureBillDraft();
       showDialog("members");
+    } else if (action === "open-couples") {
+      showDialog("couples");
+    } else if (action === "mark-day-settled") {
+      const day = button.dataset.day || "";
+      if (!day) return;
+      mutateData((next) => {
+        next.settings.settlements = { ...(next.settings.settlements || {}) };
+        next.settings.settlements[day] = new Date().toISOString();
+      }, { reason: "day-settled", message: `${day} 已标记结清。` });
+    } else if (action === "unmark-day-settled") {
+      const day = button.dataset.day || "";
+      if (!day) return;
+      mutateData((next) => {
+        next.settings.settlements = { ...(next.settings.settlements || {}) };
+        delete next.settings.settlements[day];
+      }, { reason: "day-unsettled", message: `已撤销 ${day} 的结清标记。` });
     } else if (action === "open-settings") {
       captureBillDraft();
       showDialog("settings");
@@ -2465,6 +2712,7 @@
     if (form.dataset.ledgerForm === "bill") await submitBill(form);
     if (form.dataset.ledgerForm === "member-add") await submitMemberAdd(form);
     if (form.dataset.ledgerForm === "member-edit") await submitMemberEdit(form);
+    if (form.dataset.ledgerForm === "couples") await submitCouples(form);
   }
 
   function handleRootKeydown(event) {
