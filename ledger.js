@@ -1597,6 +1597,12 @@
     const paired = pairs.length === 2;
     const allBills = ledgerData.bills;
     const settleMode = ledgerData.settings.settleMode === "couple" ? "couple" : "person";
+    const settledDayKeys = Object.keys(ledgerData.settings.settlements || {}).filter((k) => Boolean(ledgerData.settings.settlements[k]));
+    const pendingBills = allBills.filter((b) => {
+      const key = String(b.orderedAt || "").slice(0, 10) || "未标日期";
+      return !settledDayKeys.includes(key);
+    });
+    const settledCount = settledDayKeys.length;
 
     // ===== 结算方式选择器 =====
     const modeSwitch = `
@@ -1697,7 +1703,7 @@
       let coupleSummaryHtml = "";
       if (paired) {
         const [p1, p2] = pairs;
-        const net1 = coupleNetFor(allBills, p1);
+        const net1 = coupleNetFor(pendingBills, p1);
         const abs = Math.abs(net1);
         let direction = "";
         if (abs === 0) direction = `<div class="ledger-couple-line ledger-neutral">两对花费已平，无需转账。</div>`;
@@ -1713,11 +1719,18 @@
             <span class="ledger-soft-count">👫 ${escapeHtml(coupleLabel(p1))} ｜ ${escapeHtml(coupleLabel(p2))}</span>
           </div>
           ${direction}
+          ${settledCount ? `<p class="ledger-couple-note">已扣除已结清 ${settledCount} 天：这里只算还没结清的部分。</p>` : ""}
           <p class="ledger-couple-note">情侣内部的钱不分开算，两对之间只需代表互相转一笔。</p>
         </section>`;
       }
       summaryHtml = setupHtml + coupleSummaryHtml;
     } else {
+      const netById = new Map();
+      ledgerData.travelers.forEach((t) => {
+        const net = personNetFor(pendingBills, t);
+        if (net !== 0) netById.set(t.id, net);
+      });
+      const pendingTransfers = settleTransfersFor(netById);
       summaryHtml = `
         <section class="ledger-settlement-section" aria-labelledby="ledger-settlement-title">
           <div class="ledger-section-heading">
@@ -1725,11 +1738,12 @@
               <p class="ledger-section-kicker">结算方案 · 按人头</p>
               <h2 id="ledger-settlement-title">谁需要转给谁</h2>
             </div>
-            <span class="ledger-soft-count">${stats.transfers.length} 笔转账</span>
+            <span class="ledger-soft-count">${pendingTransfers.length} 笔转账</span>
           </div>
-          ${stats.transfers.length ? `
+          ${settledCount ? `<p class="ledger-couple-note">已扣除已结清 ${settledCount} 天：这里只算还没结清的部分。</p>` : ""}
+          ${pendingTransfers.length ? `
             <div class="ledger-transfer-list">
-              ${stats.transfers.map((transfer) => {
+              ${pendingTransfers.map((transfer) => {
                 const from = travelerById(transfer.fromId);
                 const to = travelerById(transfer.toId);
                 return `
