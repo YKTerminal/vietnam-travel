@@ -1469,6 +1469,60 @@
   }
 
 
+  function renderExpenseCharts(bills, baseCurrency) {
+    if (!bills.length) return "";
+    const catMark = { "餐饮": "🍜", "交通": "🚕", "住宿": "🏨", "门票": "🎫", "购物": "🛍️", "其他": "📦" };
+    const fmtCompact = (cents) => {
+      const v = Math.round(cents / 100);
+      if (v >= 10000) return `${(v / 10000).toFixed(1)}万`;
+      if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
+      return String(v);
+    };
+    const dayLabel = (k) => {
+      const m = k.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return m ? `${+m[2]}/${+m[3]}` : "无日期";
+    };
+    // 每日柱状图
+    const dayMap = new Map();
+    bills.forEach((b) => {
+      const k = String(b.orderedAt || "").slice(0, 10) || "未标日期";
+      dayMap.set(k, (dayMap.get(k) || 0) + b.baseAmountCents);
+    });
+    const dayEntries = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    const maxDay = Math.max(...dayEntries.map((e) => e[1]));
+    const bars = dayEntries.map(([k, v]) => `
+      <div class="ledger-bar-col">
+        <span class="ledger-bar-val">¥${escapeHtml(fmtCompact(v))}</span>
+        <div class="ledger-bar" style="height:${maxDay ? Math.max(5, Math.round((v / maxDay) * 100)) : 0}%"></div>
+        <span class="ledger-bar-label">${escapeHtml(dayLabel(k))}</span>
+      </div>`).join("");
+    // 类别分布
+    const catMap = new Map();
+    bills.forEach((b) => catMap.set(b.category, (catMap.get(b.category) || 0) + b.baseAmountCents));
+    const totalCents = bills.reduce((s, b) => s + b.baseAmountCents, 0);
+    const catRows = CATEGORIES.filter((c) => catMap.get(c)).map((c) => {
+      const v = catMap.get(c);
+      const pct = totalCents ? Math.max(2, Math.round((v / totalCents) * 100)) : 0;
+      const vnd = bills.filter((b) => b.category === c && b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0);
+      return `
+        <div class="ledger-cat-chart-row" data-cat="${escapeAttribute(c)}">
+          <span class="ledger-cat-chart-name">${catMark[c] || ""} ${escapeHtml(c)}</span>
+          <div class="ledger-cat-chart-track"><i style="width:${pct}%"></i></div>
+          <span class="ledger-cat-chart-amt">${escapeHtml(formatMoney(v, baseCurrency))}${vnd ? `<small class="ledger-day-vnd">${escapeHtml(formatMoney(vnd, "VND"))}</small>` : ""}</span>
+        </div>`;
+    }).join("");
+    return `
+      <section class="ledger-summary-section ledger-chart-section" aria-label="消费图表">
+        <div class="ledger-section-heading">
+          <div><p class="ledger-section-kicker">消费情况</p><h2>📊 图表总览</h2></div>
+        </div>
+        <h3 class="ledger-chart-title">每日花销</h3>
+        <div class="ledger-bar-chart">${bars}</div>
+        <h3 class="ledger-chart-title">类别分布</h3>
+        <div class="ledger-cat-chart">${catRows}</div>
+      </section>`;
+  }
+
   function renderSummaryPage() {
     const travelers = ledgerData.travelers;
     const allBills = ledgerData.bills;
@@ -1582,6 +1636,8 @@
           <span>${bills.length} 笔账单 · ${days} 天 · 以 ${escapeHtml(baseCurrency)} 结算</span>
           ${bills.some((b) => b.currency === "VND") ? `<span>其中越南盾 ${escapeHtml(formatMoney(bills.filter((b) => b.currency === "VND").reduce((s, b) => s + b.originalAmountCents, 0), "VND"))}</span>` : ""}
         </section>
+
+        ${renderExpenseCharts(bills, baseCurrency)}
 
         <section class="ledger-summary-section">
           <div class="ledger-section-heading">
