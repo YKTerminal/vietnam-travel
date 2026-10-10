@@ -598,7 +598,7 @@
     return (bill.participantIds || []).length === 1 && bill.participantIds[0] === bill.payerId;
   }
 
-  function coupleNetFor(bills, pair) {
+  function coupleBreakdown(bills, pair) {
     const paid = bills.filter((b) => pair.includes(b.payerId)).reduce((s, b) => s + b.baseAmountCents, 0);
     const owed = bills.reduce((s, b) => {
       const shares = billShares(b);
@@ -606,13 +606,21 @@
       for (const id of pair) part += shares.get(id) || 0;
       return s + part;
     }, 0);
-    return paid - owed;
+    return { paid, owed, net: paid - owed };
+  }
+
+  function coupleNetFor(bills, pair) {
+    return coupleBreakdown(bills, pair).net;
+  }
+
+  function personBreakdown(dayBills, traveler) {
+    const paid = dayBills.filter((b) => b.payerId === traveler.id).reduce((s, b) => s + b.baseAmountCents, 0);
+    const owed = dayBills.reduce((s, b) => s + (billShares(b).get(traveler.id) || 0), 0);
+    return { paid, owed, net: paid - owed };
   }
 
   function personNetFor(dayBills, traveler) {
-    const paid = dayBills.filter((b) => b.payerId === traveler.id).reduce((s, b) => s + b.baseAmountCents, 0);
-    const owed = dayBills.reduce((s, b) => s + (billShares(b).get(traveler.id) || 0), 0);
-    return paid - owed;
+    return personBreakdown(dayBills, traveler).net;
   }
 
   function settleTransfersFor(netById) {
@@ -1703,12 +1711,28 @@
       let coupleSummaryHtml = "";
       if (paired) {
         const [p1, p2] = pairs;
-        const net1 = coupleNetFor(pendingBills, p1);
+        const b1 = coupleBreakdown(pendingBills, p1);
+        const net1 = b1.net;
         const abs = Math.abs(net1);
         let direction = "";
         if (abs === 0) direction = `<div class="ledger-couple-line ledger-neutral">两对花费已平，无需转账。</div>`;
         else if (net1 > 0) direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p2))} 需转给 ${escapeHtml(coupleLabel(p1))} ${moneyWithVnd(net1, baseCurrency)}（${escapeHtml(travelerById(p2[0]).name)} → ${escapeHtml(travelerById(p1[0]).name)} 转一次即可）</div>`;
         else direction = `<div class="ledger-couple-line">${escapeHtml(coupleLabel(p1))} 需转给 ${escapeHtml(coupleLabel(p2))} ${moneyWithVnd(-net1, baseCurrency)}（${escapeHtml(travelerById(p1[0]).name)} → ${escapeHtml(travelerById(p2[0]).name)} 转一次即可）</div>`;
+        const coupleRows = pairs.map((pair, idx) => {
+          const b = idx === 0 ? b1 : coupleBreakdown(pendingBills, pair);
+          return `
+          <div class="ledger-breakdown-row">
+            <div class="ledger-breakdown-head">
+              <span class="ledger-breakdown-name">👫 ${escapeHtml(coupleLabel(pair))}</span>
+              <span class="ledger-breakdown-net ${b.net > 0 ? "ledger-positive" : b.net < 0 ? "ledger-negative" : "ledger-neutral"}">${b.net > 0 ? "应收" : b.net < 0 ? "应付" : "已平"} ${moneyWithVnd(Math.abs(b.net), baseCurrency)}</span>
+            </div>
+            <div class="ledger-breakdown-steps">
+              <span>垫付 ${moneyWithVnd(b.paid, baseCurrency)}</span>
+              <span>−</span>
+              <span>应分摊 ${moneyWithVnd(b.owed, baseCurrency)}</span>
+            </div>
+          </div>`;
+        }).join("");
         coupleSummaryHtml = `
         <section class="ledger-settlement-section" aria-labelledby="ledger-couple-title">
           <div class="ledger-section-heading">
@@ -1717,6 +1741,11 @@
               <h2 id="ledger-couple-title">谁转给谁（只需一笔）</h2>
             </div>
             <span class="ledger-soft-count">👫 ${escapeHtml(coupleLabel(p1))} ｜ ${escapeHtml(coupleLabel(p2))}</span>
+          </div>
+          <div class="ledger-breakdown-list">
+            <p class="ledger-breakdown-title">🧮 计算过程</p>
+            <p class="ledger-breakdown-formula">每对合并垫付与分摊，净额 = 垫付 − 应分摊；净额为正的对是应收方，为负的对应付方，两对之间只需补差额。</p>
+            ${coupleRows}
           </div>
           ${direction}
           ${settledCount ? `<p class="ledger-couple-note">已扣除已结清 ${settledCount} 天：这里只算还没结清的部分。</p>` : ""}
@@ -1731,6 +1760,21 @@
         if (net !== 0) netById.set(t.id, net);
       });
       const pendingTransfers = settleTransfersFor(netById);
+      const breakdownRows = ledgerData.travelers.map((t) => {
+        const b = personBreakdown(pendingBills, t);
+        return `
+          <div class="ledger-breakdown-row">
+            <div class="ledger-breakdown-head">
+              <span class="ledger-breakdown-name">${renderAvatar(t, "small")} ${escapeHtml(t.name)}</span>
+              <span class="ledger-breakdown-net ${b.net > 0 ? "ledger-positive" : b.net < 0 ? "ledger-negative" : "ledger-neutral"}">${b.net > 0 ? "应收" : b.net < 0 ? "应付" : "已平"} ${moneyWithVnd(Math.abs(b.net), baseCurrency)}</span>
+            </div>
+            <div class="ledger-breakdown-steps">
+              <span>垫付 ${moneyWithVnd(b.paid, baseCurrency)}</span>
+              <span>−</span>
+              <span>应分摊 ${moneyWithVnd(b.owed, baseCurrency)}</span>
+            </div>
+          </div>`;
+      }).join("");
       summaryHtml = `
         <section class="ledger-settlement-section" aria-labelledby="ledger-settlement-title">
           <div class="ledger-section-heading">
@@ -1741,6 +1785,11 @@
             <span class="ledger-soft-count">${pendingTransfers.length} 笔转账</span>
           </div>
           ${settledCount ? `<p class="ledger-couple-note">已扣除已结清 ${settledCount} 天：这里只算还没结清的部分。</p>` : ""}
+          <div class="ledger-breakdown-list">
+            <p class="ledger-breakdown-title">🧮 计算过程</p>
+            <p class="ledger-breakdown-formula">净额 = 垫付 − 应分摊 · 正数应收（别人欠他），负数应付（他欠别人）</p>
+            ${breakdownRows}
+          </div>
           ${pendingTransfers.length ? `
             <div class="ledger-transfer-list">
               ${pendingTransfers.map((transfer) => {
